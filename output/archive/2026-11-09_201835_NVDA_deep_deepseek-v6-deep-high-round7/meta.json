@@ -1,0 +1,46 @@
+{
+ "ticker": "NVDA",
+ "company": "NVIDIA",
+ "currency": "USD",
+ "price": 186.64,
+ "as_of": "2026-11-06",
+ "data_time": "2026-11-09T12:18:35.717850+00:00",
+ "rating": "Hold",
+ "fair_value": 180.42936792828414,
+ "upside": -0.03327599695518568,
+ "ai": true,
+ "status": "generated",
+ "mode": "deep",
+ "model": "deepseek-flash",
+ "cost_usd": 0.34096,
+ "kind": "deep",
+ "label": "Deep report",
+ "created": "2026-11-09T13:02:29.158399+00:00",
+ "source": "dev",
+ "group": "DeepSeek v6 deep, round 7 (9 Nov)",
+ "note": "Development round: an earlier version of the tool, kept for comparison. Its rating and text are not a current view.",
+ "cost_note": null,
+ "files": [
+  {
+   "name": "NVDA_deep.pdf",
+   "type": "pdf"
+  },
+  {
+   "name": "NVDA_deep.json",
+   "type": "json"
+  },
+  {
+   "name": "NVDA_deep_data.xlsx",
+   "type": "xlsx"
+  },
+  {
+   "name": "NVDA_deep_sources.pdf",
+   "type": "sources"
+  },
+  {
+   "name": "NVDA_deep_datapack.zip",
+   "type": "zip"
+  }
+ ],
+ "id": "2026-11-09_201835_NVDA_deep_deepseek-v6-deep-high-round7"
+}

@@ -1,0 +1,25 @@
+# API keys and local settings (never commit)
+.env
+secrets/
+.claude/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local data: cache, history
+data/
+*.sqlite3
+
+# Outputs: everything except the report archive, which ships with the repo so a fresh clone can browse it
+output/*
+!output/archive/
+investsync/render/build/
+
+# Third-party sample reports downloaded for internal reference only (copyright of their publishers)
+reference_reports/
+
+# OS
+.DS_Store

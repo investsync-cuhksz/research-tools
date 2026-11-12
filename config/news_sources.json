@@ -1,0 +1,28 @@
+{
+  "_comment": "News sources we keep. Owned by the team: add or remove outlets here, no code change needed. News from any other outlet is not shown in the report, not given to the writers and not read by the research desk. Company documents (results releases, filings, announcements, call summaries) and broker reports are not news and are never filtered by this list. A source is kept when its publisher name is in 'names', or, for a direct link, when the website is in 'domains'. Links through an aggregator (finnhub, Yahoo Finance, EastMoney, MSN, Bing) are judged by the publisher's name only, because the aggregator also carries low-quality sites. Names are compared ignoring case, spaces, punctuation, a leading 'The' and a trailing '.com'. Set NEWS_ALLOWLIST=0 to switch the list off.",
+  "names": [
+    "Reuters", "Bloomberg", "Associated Press", "AP", "Dow Jones Newswires", "MT Newswires",
+    "The Wall Street Journal", "WSJ", "Financial Times", "FT", "Barron's", "MarketWatch", "CNBC",
+    "Investor's Business Daily", "The Economist", "Nikkei Asia", "Nikkei", "Fortune", "Axios", "The Information",
+    "Fox Business", "CNN Business", "CNN", "BBC", "BBC News", "The New York Times", "The Washington Post",
+    "The Guardian", "The Globe and Mail", "South China Morning Post", "SCMP", "The Straits Times", "Caixin Global",
+    "Mint", "CNBC-TV18", "Yahoo Finance", "Yahoo Finance Video", "TechCrunch", "The Verge", "Wired",
+    "Council on Foreign Relations",
+    "财联社", "第一财经", "证券时报", "证券时报网", "中国证券报", "上海证券报", "证券日报", "21世纪经济报道",
+    "经济观察报", "财新", "财新网", "新华社", "新华网", "人民网", "人民财讯", "南方财经网", "每日经济新闻",
+    "界面新闻", "澎湃新闻", "中国基金报", "经济参考报", "央视财经"
+  ],
+  "domains": [
+    "reuters.com", "bloomberg.com", "apnews.com", "wsj.com", "ft.com", "barrons.com", "marketwatch.com",
+    "cnbc.com", "investors.com", "economist.com", "asia.nikkei.com", "fortune.com", "axios.com",
+    "theinformation.com", "foxbusiness.com", "cnn.com", "bbc.com", "bbc.co.uk", "nytimes.com",
+    "washingtonpost.com", "theguardian.com", "theglobeandmail.com", "scmp.com", "straitstimes.com",
+    "caixinglobal.com", "livemint.com", "cnbctv18.com", "techcrunch.com", "theverge.com", "wired.com", "cfr.org",
+    "cls.cn", "yicai.com", "stcn.com", "cs.com.cn", "cnstock.com", "zqrb.cn", "21jingji.com", "eeo.com.cn",
+    "caixin.com", "xinhuanet.com", "news.cn", "people.com.cn", "nbd.com.cn", "jiemian.com", "thepaper.cn"
+  ],
+  "aggregators": [
+    "finnhub.io", "finance.yahoo.com", "yahoo.com", "finance.eastmoney.com", "eastmoney.com", "msn.com",
+    "bing.com", "news.google.com", "news.yahoo.com"
+  ]
+}

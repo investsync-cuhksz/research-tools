@@ -1,0 +1,46 @@
+{
+ "ticker": "NVDA",
+ "company": "NVIDIA",
+ "currency": "USD",
+ "price": 186.64,
+ "as_of": "2026-11-06",
+ "data_time": "2026-11-09T10:38:14.943942+00:00",
+ "rating": "Hold",
+ "fair_value": 175.12711007205033,
+ "upside": -0.061685008186614154,
+ "ai": true,
+ "status": "generated",
+ "mode": "single",
+ "model": "deepseek-flash",
+ "cost_usd": null,
+ "kind": "learner",
+ "label": "Learner's guide",
+ "created": "2026-11-09T11:05:15.209869+00:00",
+ "source": "dev",
+ "group": "DeepSeek v5 (9 Nov)",
+ "note": "Development round: an earlier version of the tool, kept for comparison. Its rating and text are not a current view.",
+ "cost_note": "included in the standard report's cost",
+ "files": [
+  {
+   "name": "NVDA_learner.pdf",
+   "type": "pdf"
+  },
+  {
+   "name": "NVDA_learner.json",
+   "type": "json"
+  },
+  {
+   "name": "NVDA_learner_data.xlsx",
+   "type": "xlsx"
+  },
+  {
+   "name": "NVDA_learner_sources.pdf",
+   "type": "sources"
+  },
+  {
+   "name": "NVDA_learner_datapack.zip",
+   "type": "zip"
+  }
+ ],
+ "id": "2026-11-09_183814_NVDA_learner_deepseek-v5"
+}

@@ -1,0 +1,14 @@
+.venv
+.git
+.env
+data
+output
+fixtures
+tests
+__pycache__
+*.pdf
+investsync/render/build
+
+# API keys: pass them to containers as environment variables instead
+secrets/
+reference_reports/

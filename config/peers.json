@@ -1,0 +1,3 @@
+{
+  "_comment": "Optional per-ticker peer overrides; EMPTY BY DESIGN (user, 9 Nov 2026: 'no rule should be company specific; this tool is for any company listed'). Every company's peers come from the general AI selection plus code screens (narrative/peers.py). Format if ever needed: \"TICKER\": [\"PEER1\", ...], with an optional '_why' object."
+}

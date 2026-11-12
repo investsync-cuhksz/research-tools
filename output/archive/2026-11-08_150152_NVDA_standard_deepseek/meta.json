@@ -1,0 +1,46 @@
+{
+ "ticker": "NVDA",
+ "company": "NVIDIA",
+ "currency": "USD",
+ "price": 186.64,
+ "as_of": "2026-11-06",
+ "data_time": "2026-11-08T07:01:52.941093+00:00",
+ "rating": "Sell",
+ "fair_value": 110.02822583093898,
+ "upside": -0.4104788585997696,
+ "ai": true,
+ "status": "generated",
+ "mode": "single",
+ "model": "deepseek-flash",
+ "cost_usd": null,
+ "kind": "standard",
+ "label": "Standard report",
+ "created": "2026-11-08T07:02:54.035009+00:00",
+ "source": "dev",
+ "group": "DeepSeek v1 (8 Nov)",
+ "note": "Development round: an earlier version of the tool, kept for comparison. Its rating and text are not a current view.",
+ "cost_note": "cost not recorded",
+ "files": [
+  {
+   "name": "NVDA_standard.pdf",
+   "type": "pdf"
+  },
+  {
+   "name": "NVDA_standard.json",
+   "type": "json"
+  },
+  {
+   "name": "NVDA_standard_data.xlsx",
+   "type": "xlsx"
+  },
+  {
+   "name": "NVDA_standard_sources.pdf",
+   "type": "sources"
+  },
+  {
+   "name": "NVDA_standard_datapack.zip",
+   "type": "zip"
+  }
+ ],
+ "id": "2026-11-08_150152_NVDA_standard_deepseek"
+}

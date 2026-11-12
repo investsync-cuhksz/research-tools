@@ -1,0 +1,46 @@
+{
+ "ticker": "300750.SZ",
+ "company": "Contemporary Amperex Technology Co.",
+ "currency": "CNY",
+ "price": 254.22,
+ "as_of": "2026-11-06",
+ "data_time": "2026-11-08T12:11:12.085754+00:00",
+ "rating": "Buy",
+ "fair_value": 479.74393858830064,
+ "upside": 0.8871211493521385,
+ "ai": true,
+ "status": "flagged",
+ "mode": "single",
+ "model": "deepseek-flash",
+ "cost_usd": null,
+ "kind": "learner",
+ "label": "Learner's guide",
+ "created": "2026-11-08T12:12:02.698123+00:00",
+ "source": "dev",
+ "group": "DeepSeek v2, first attempt (8 Nov)",
+ "note": "Development round: an earlier version of the tool, kept for comparison. Its rating and text are not a current view.",
+ "cost_note": "included in the standard report's cost",
+ "files": [
+  {
+   "name": "300750_SZ_learner.pdf",
+   "type": "pdf"
+  },
+  {
+   "name": "300750_SZ_learner.json",
+   "type": "json"
+  },
+  {
+   "name": "300750_SZ_learner_data.xlsx",
+   "type": "xlsx"
+  },
+  {
+   "name": "300750_SZ_learner_sources.pdf",
+   "type": "sources"
+  },
+  {
+   "name": "300750_SZ_learner_datapack.zip",
+   "type": "zip"
+  }
+ ],
+ "id": "2026-11-08_201112_300750_SZ_learner_deepseek-v2-run1"
+}

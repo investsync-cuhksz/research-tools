@@ -1,0 +1,46 @@
+{
+ "ticker": "0700.HK",
+ "company": "Tencent Holdings",
+ "currency": "HKD",
+ "price": 419.8,
+ "as_of": "2026-11-06",
+ "data_time": "2026-11-08T15:31:28.521274+00:00",
+ "rating": "Buy",
+ "fair_value": 526.5734280027839,
+ "upside": 0.2543435636083464,
+ "ai": true,
+ "status": "generated",
+ "mode": "single",
+ "model": "deepseek-flash",
+ "cost_usd": 0.31088,
+ "kind": "standard",
+ "label": "Standard report",
+ "created": "2026-11-08T16:01:35.927978+00:00",
+ "source": "dev",
+ "group": "DeepSeek v3 (8 Nov)",
+ "note": "Development round: an earlier version of the tool, kept for comparison. Its rating and text are not a current view.",
+ "cost_note": "standard + learner written together",
+ "files": [
+  {
+   "name": "0700_HK_standard.pdf",
+   "type": "pdf"
+  },
+  {
+   "name": "0700_HK_standard.json",
+   "type": "json"
+  },
+  {
+   "name": "0700_HK_standard_data.xlsx",
+   "type": "xlsx"
+  },
+  {
+   "name": "0700_HK_standard_sources.pdf",
+   "type": "sources"
+  },
+  {
+   "name": "0700_HK_standard_datapack.zip",
+   "type": "zip"
+  }
+ ],
+ "id": "2026-11-08_233128_0700_HK_standard_deepseek-v3"
+}

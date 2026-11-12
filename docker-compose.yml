@@ -1,0 +1,16 @@
+# docker compose up -d --build     (on the Lighthouse server; put secrets in .env next to this file)
+services:
+  research-tools:
+    build: .
+    image: investsync/research-tools:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      CACHE_DB_PATH: /data/cache.sqlite3
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+    volumes:
+      - cache:/data
+    ports:
+      - "127.0.0.1:8000:8000"   # expose via Cloudflare / a reverse proxy, not directly
+volumes:
+  cache:

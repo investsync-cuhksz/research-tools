@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report Archive · InvestSync Research Tools</title>
+<link rel="icon" type="image/png" href="/static/investsync-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      media="print" onload="this.media='all'">
+<style>
+  /* the main page's tokens (api/static/index.html) */
+  :root {
+    --navy:#1B3A8C; --navy-d:#142C6E; --tint:#EEF1F8; --tint-2:#F6F8FC;
+    --orange:#E8590C; --orange-tint:#FDF0E8;
+    --ink:#1D2433; --muted:#5B6475; --faint:#8A92A3; --rule:#D9DEE8; --rule-2:#E8EBF1;
+    --pos:#1E7B4F; --pos-tint:#E6F3EC; --neg:#B3261E; --neg-tint:#FBEAE8; --hold:#8A6D1F; --hold-tint:#F6F0DF;
+    --bg:#F3F5F9; --card:#fff;
+    --shadow: 0 1px 2px rgba(20,32,64,.05), 0 2px 8px rgba(20,32,64,.05);
+    --font: "Inter", "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font: 14px/1.5 var(--font); color: var(--ink); background: var(--bg);
+         -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column; }
+  a { color: var(--navy); }
+  svg.i { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8;
+          stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+  .topbar { position: sticky; top: 0; z-index: 10; background: #fff; border-bottom: 1px solid var(--rule); }
+  .topbar::before { content: ""; display: block; height: 3px; background: var(--navy); }
+  .topbar-in { display: flex; align-items: center; gap: 18px; padding: 12px 28px; max-width: 1680px; margin: 0 auto; }
+  .brand img { display: block; height: 38px; width: auto; }
+  .brand-sep { width: 1px; height: 32px; background: var(--rule); }
+  .brand-app b { display: block; font-size: 16px; font-weight: 700; color: var(--navy); }
+  .brand-app span { display: block; font-size: 12px; color: var(--muted); }
+  .back { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 9px;
+          border: 1px solid var(--rule); background: #fff; color: var(--ink); font: 500 13px var(--font); text-decoration: none; }
+  .back:hover { border-color: #AFB9CF; background: var(--tint-2); }
+
+  main { flex: 1; width: 100%; max-width: 1680px; margin: 0 auto; padding: 22px 28px 8px; }
+  .head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+  .eyebrow { margin: 0 0 4px; font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--orange); }
+  h1 { margin: 0; font-size: 28px; line-height: 1.15; font-weight: 800; color: var(--navy); letter-spacing: -.02em; }
+  .lead { margin: 6px 0 0; color: var(--muted); max-width: 760px; font-size: 13.5px; }
+  .filters { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .filters label { display: block; font-size: 11.5px; font-weight: 600; color: var(--muted); margin-bottom: 3px; }
+  select { height: 36px; min-width: 150px; padding: 0 10px; border: 1px solid var(--rule); border-radius: 7px; background: #fff;
+           font: 13px var(--font); color: var(--ink); }
+  select:focus { outline: 2px solid rgba(27,58,140,.3); border-color: var(--navy); }
+  .count { font-size: 12.5px; color: var(--muted); padding-bottom: 8px; white-space: nowrap; }
+
+  .card { background: var(--card); border: 1px solid var(--rule); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+       padding: 11px 14px; background: var(--tint-2); border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--rule-2); vertical-align: top; font-size: 13px; }
+  tr:last-child td { border-bottom: 0; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .t { font-weight: 700; color: var(--navy); } .co { display: block; color: var(--muted); font-size: 12px; }
+  .kind { font-weight: 600; }
+  .sub { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+  .chip { display: inline-block; margin: 3px 4px 0 0; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600;
+          background: var(--tint); color: var(--navy); white-space: nowrap; }
+  .chip.run { background: var(--orange-tint); color: #B9470A; } .chip.fix { background: var(--pos-tint); color: var(--pos); }
+  .chip.dev { background: #EEF0F4; color: var(--muted); }
+  .btn.ghost { border-style: dashed; color: var(--muted); }
+  .chip.noai { background: #fff; border: 1px solid var(--rule); color: var(--muted); }
+  .badge { display: inline-block; padding: 1px 7px; border-radius: 4px; color: #fff; font-size: 11.5px; font-weight: 800;
+           letter-spacing: .05em; text-transform: uppercase; margin-right: 6px; }
+  .note { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); max-width: 420px; }
+  .files { display: flex; gap: 6px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px; border-radius: 8px; font: 600 12.5px var(--font);
+         text-decoration: none; border: 1px solid var(--rule); color: var(--ink); background: #fff; white-space: nowrap; }
+  .btn:hover { border-color: #AFB9CF; background: var(--tint-2); }
+  .btn.pdf { background: var(--navy); border-color: var(--navy); color: #fff; } .btn.pdf:hover { background: var(--navy-d); }
+  .empty { padding: 40px 24px; text-align: center; color: var(--muted); }
+  .empty b { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+
+  footer { margin-top: 24px; border-top: 1px solid var(--rule); background: #fff; }
+  .foot-in { max-width: 1680px; margin: 0 auto; padding: 16px 28px; display: flex; align-items: center; gap: 14px; font-size: 12px; color: var(--muted); }
+  .foot-in img { height: 22px; width: 22px; }
+
+  @media (max-width: 900px) {
+    .topbar-in, main, .foot-in { padding-left: 16px; padding-right: 16px; }
+    .brand-app span, .brand-sep { display: none; }
+    .filters { margin-left: 0; width: 100%; }
+    .filters > div { flex: 1; } select { width: 100%; min-width: 0; }
+    /* rows become cards */
+    table, tbody, tr, td { display: block; width: 100%; }
+    thead { display: none; }
+    tr { padding: 12px 14px; border-bottom: 1px solid var(--rule); }
+    tr:last-child { border-bottom: 0; }
+    td { border: 0; padding: 3px 0; }
+    td[data-l]::before { content: attr(data-l); display: inline-block; min-width: 92px; font-size: 11px; font-weight: 700;
+                         letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+    td.first { padding-bottom: 6px; }
+    td.files-cell { padding-top: 8px; }
+    .note { max-width: none; }
+  }
+  @media (max-width: 600px) {
+    .brand img { height: 30px; }
+    .brand-app { display: none; }
+    td .co { display: inline; margin-left: 4px; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m11 6-6 6 6 6"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M19 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 4 18.5v-12A1.5 1.5 0 0 1 5.5 5H10"/></symbol>
+</svg>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="/" title="InvestSync Research Tools"><img src="/static/investsync-logo.png"
+       alt="InvestSync Student Investment Organization" width="190" height="38"></a>
+    <span class="brand-sep"></span>
+    <div class="brand-app"><b>Research Tools</b><span>Report archive</span></div>
+    <a class="back" href="/"><svg class="i"><use href="#i-back"/></svg>Build a report</a>
+  </div>
+</header>
+
+<main>
+  <div class="head">
+    <div>
+      <p class="eyebrow">Archive</p>
+      <h1>Every report we have generated</h1>
+      <p class="lead">Each report built on this site is saved once, with the data it was drawn from. The paid runs made
+        for the review (runs 1 to 4, 11–12 Nov) are here too, with the corrected re-renders made afterwards, and so are the
+        earlier DeepSeek development rounds (8–9 Nov), kept for comparison.</p>
+    </div>
+    <div class="filters">
+      <div><label for="fticker">Company</label><select id="fticker"><option value="">All companies</option></select></div>
+      <div><label for="fkind">Report</label><select id="fkind"><option value="">All reports</option></select></div>
+      <div><label for="fgroup">Run</label><select id="fgroup"><option value="">All runs</option>
+        <option value="@web">Built on this site</option></select></div>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Made</th><th>Company</th><th>Report</th><th>Rating · fair value</th><th>Price</th><th>AI cost</th><th>Files</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="empty" hidden><b>No reports yet</b>Reports you generate on the main page appear here.</div>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-in">
+    <img src="/static/investsync-mark.png" alt="">
+    <span>For education within the InvestSync Student Investment Organization (CUHK-Shenzhen) · the AI rating is a model
+      output, not investment advice</span>
+  </div>
+</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+const num = (x, d = 2) => x == null || isNaN(x) ? "–"
+  : Number(x).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (x) => x == null || isNaN(x) ? "" : (x >= 0 ? "+" : "−") + Math.abs(x * 100).toFixed(1) + "%";
+const when = (s) => { const d = new Date(s); return isNaN(d) ? "–" :
+  d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) + ", " +
+  d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }); };
+const day = (s) => { const d = new Date(String(s).slice(0, 10) + "T00:00:00");
+  return isNaN(d) ? "–" : d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); };
+const RATING_COL = { Buy: "var(--pos)", Outperform: "#4F9A6E", Hold: "var(--hold)", Underperform: "#C8574F", Sell: "var(--neg)" };
+const KIND_ORDER = ["deep", "standard", "learner", "data", "tearsheet"];
+let all = [];
+
+function cost(e) {
+  if (e.kind === "data") return "free (no AI)";
+  if (e.cost_usd == null) return e.cost_note ? `<span class="sub">${esc(e.cost_note)}</span>` : "–";
+  if (e.cost_usd === 0) return e.cost_note ? esc(e.cost_note) : (e.ai ? "0 (cached)" : "free (no AI)");
+  return `USD ${num(e.cost_usd)}` + (e.cost_note ? `<span class="sub">${esc(e.cost_note)}</span>` : "");
+}
+function rating(e) {
+  if (!e.rating) return `<span class="sub">${e.kind === "data" ? "No rating in this edition" : "No rating"}</span>`;
+  const col = RATING_COL[e.rating] || "var(--muted)";
+  return `<span class="badge" style="background:${col}">${esc(e.rating)}</span>` +
+    (e.fair_value != null ? `${esc(e.currency || "")} ${num(e.fair_value)} <span class="sub">${pct(e.upside)} vs price</span>` : "");
+}
+const FILE_LABELS = { pdf: "Open PDF", json: "JSON", xlsx: "Excel", sources: "Sources PDF", zip: "Data pack",
+                      zip_docs: "Pack + documents" };
+function row(e) {
+  // the report, then its source pack (Excel, sources, ZIP); a pack not built yet is built when clicked
+  const base = `/v1/archive/${encodeURIComponent(e.id)}`;
+  const has = t => (e.files || []).some(f => f.type === t);
+  const order = ["pdf", "xlsx", "sources", "json", "zip", "zip_docs"];
+  const files = (e.files || []).slice().sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type))
+    .map(f => `<a class="btn ${f.type === "pdf" ? "pdf" : ""}" target="_blank" rel="noopener" title="${esc(f.name)}"
+      href="${base}/${encodeURIComponent(f.name)}">${esc(FILE_LABELS[f.type] || f.type)}</a>`).join("")
+    + (has("zip") ? "" : `<a class="btn" href="${base}/pack" title="Built from this report's saved data the first time (a few seconds)">Data pack</a>`)
+    + (has("zip_docs") ? "" : `<a class="btn ghost" href="${base}/pack?documents=true"
+      title="The data pack plus the original documents (filings, results releases, annual report). Downloaded the first time: this can take several minutes.">+ documents</a>`);
+  const chips = [e.group ? `<span class="chip ${e.source === "run" ? "run" : e.source === "dev" ? "dev" : ""}">${esc(e.group)}</span>` : "",
+                 e.note && /^Corrected/.test(e.note) ? `<span class="chip fix">Corrected version</span>` : "",
+                 !e.ai && e.kind !== "data" ? `<span class="chip noai">numbers only</span>` : ""].join("");
+  return `<tr>
+    <td class="num first" data-l="Made">${esc(when(e.created))}</td>
+    <td data-l="Company"><span class="t">${esc(e.ticker)}</span> <span class="co">${esc(e.company)}</span></td>
+    <td data-l="Report"><span class="kind">${esc(e.label || e.kind)}</span>${chips ? "<br>" + chips : ""}
+      ${e.note ? `<span class="note">${esc(e.note)}</span>` : ""}</td>
+    <td class="num" data-l="Rating">${rating(e)}</td>
+    <td class="num" data-l="Price">${esc(e.currency || "")} ${num(e.price)}<span class="sub">as of ${esc(day(e.as_of))}</span></td>
+    <td class="num" data-l="AI cost">${cost(e)}</td>
+    <td class="files-cell" data-l=""><div class="files">${files}</div></td></tr>`;
+}
+function render() {
+  const t = $("fticker").value, k = $("fkind").value, g = $("fgroup").value;
+  const inRun = e => !g || (g === "@web" ? e.source === "web" : e.group === g);
+  const shown = all.filter(e => (!t || e.ticker === t) && (!k || e.kind === k) && inRun(e));
+  $("rows").innerHTML = shown.map(row).join("");
+  $("empty").hidden = shown.length > 0;
+  if (!shown.length && all.length) $("empty").innerHTML = "<b>Nothing matches</b>Clear a filter to see more reports.";
+  $("count").textContent = `${shown.length} of ${all.length} report${all.length === 1 ? "" : "s"}`;
+  const q = new URLSearchParams(); if (t) q.set("ticker", t); if (k) q.set("kind", k); if (g) q.set("run", g);
+  history.replaceState(null, "", q.toString() ? `?${q}` : location.pathname);
+}
+async function load() {
+  try {
+    all = (await (await fetch("/v1/archive")).json()).entries || [];
+  } catch (e) {
+    $("empty").hidden = false; $("empty").innerHTML = "<b>The archive could not be loaded</b>Is the server running?"; return;
+  }
+  const tickers = [...new Set(all.map(e => e.ticker))].sort();
+  const names = Object.fromEntries(all.map(e => [e.ticker, e.company]));
+  $("fticker").insertAdjacentHTML("beforeend", tickers.map(t => `<option value="${esc(t)}">${esc(t)} · ${esc(names[t])}</option>`).join(""));
+  const labels = Object.fromEntries(all.map(e => [e.kind, e.label || e.kind]));
+  const kinds = [...new Set(all.map(e => e.kind))].sort((a, b) => KIND_ORDER.indexOf(a) - KIND_ORDER.indexOf(b));
+  $("fkind").insertAdjacentHTML("beforeend", kinds.map(k => `<option value="${esc(k)}">${esc(labels[k])}</option>`).join(""));
+  const q = new URLSearchParams(location.search);
+  if (q.get("ticker")) $("fticker").value = q.get("ticker");
+  if (q.get("kind")) $("fkind").value = q.get("kind");
+  // runs: the two review runs first, then the development rounds, newest first
+  const groups = [...new Set(all.filter(e => e.group).map(e => e.group))];
+  const firstAt = Object.fromEntries(groups.map(g => [g, Math.max(...all.filter(e => e.group === g).map(e => +new Date(e.created)))]));
+  const isRun = g => all.some(e => e.group === g && e.source === "run");
+  groups.sort((a, b) => (isRun(b) - isRun(a)) || (firstAt[b] - firstAt[a]));
+  $("fgroup").insertAdjacentHTML("beforeend", groups.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join(""));
+  if (q.get("run")) $("fgroup").value = q.get("run");
+  render();
+}
+$("fticker").onchange = render; $("fkind").onchange = render; $("fgroup").onchange = render;
+load();
+</script>
+</body>
+</html>

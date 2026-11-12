@@ -1,0 +1,25 @@
+{
+  "_comment": "Rule-based 'AI rating'. Owned by the finance team. The code blends the methods below into a fair value per share, then compares it with the share price. The AI never chooses the rating; it only explains it.",
+  "thresholds": {
+    "buy": 0.15,
+    "sell": -0.10,
+    "_note": "Buy if fair value is at least 15% above the price, Sell if at least 10% below, otherwise Hold."
+  },
+  "weights": {
+    "default":   {"dcf": 0.5, "peer_pe": 0.25, "peer_ev_ebitda": 0.25, "peer_pb": 0.0},
+    "financial": {"ddm": 0.5, "peer_pb": 0.3,  "peer_pe": 0.2},
+    "_note": "Weights are renormalised over the methods available for a company. Analyst targets and the 52-week range are shown for context only and never enter the rating; the Monte Carlo is the same model as the DCF, so it is not counted twice."
+  },
+  "outlier_band": 0.5,
+  "_outlier_note": "A method whose value is more than 50% away from the median of all methods is excluded as an outlier.",
+  "min_methods": 2,
+  "confidence": {"high_cv": 0.15, "medium_cv": 0.30, "_note": "Spread of the included methods (coefficient of variation): <= 15% with 3+ methods = high, <= 30% = medium, else low."},
+  "overall": {
+    "model_weight": 0.3333,
+    "fresh_days": 90,
+    "full_weight_days": 30,
+    "older_weight": 0.5,
+    "min_brokers": 3,
+    "_note": "Page-1 overall view (shown next to the AI rating, never replaces it). Scores: Sell 1, Underperform 2, Hold 3, Outperform 4, Buy 5 (model Buy/Hold/Sell = 5/3/1). Each broker's latest rating counts if at most fresh_days old: fully up to full_weight_days, older_weight after that. The model counts model_weight, the brokers the rest; with fewer than min_brokers recent brokers their share shrinks in proportion. Model not rated -> brokers only."
+  }
+}

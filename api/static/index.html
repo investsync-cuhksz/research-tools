@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InvestSync Research Tools</title>
+<link rel="icon" type="image/png" href="/static/investsync-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Inter if Google Fonts is reachable; loaded without blocking the page, so a blocked network falls back at once -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      media="print" onload="this.media='all'">
+<style>
+  :root {
+    --navy:#1B3A8C; --navy-d:#142C6E; --tint:#EEF1F8; --tint-2:#F6F8FC;
+    --orange:#E8590C; --orange-tint:#FDF0E8;
+    --ink:#1D2433; --muted:#5B6475; --faint:#8A92A3; --rule:#D9DEE8; --rule-2:#E8EBF1;
+    --pos:#1E7B4F; --pos-tint:#E6F3EC; --neg:#B3261E; --neg-tint:#FBEAE8; --hold:#8A6D1F; --hold-tint:#F6F0DF;
+    --bg:#F3F5F9; --card:#fff;
+    --shadow: 0 1px 2px rgba(20,32,64,.05), 0 2px 8px rgba(20,32,64,.05);
+    --font: "Inter", "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font: 14px/1.5 var(--font); color: var(--ink); background: var(--bg);
+         -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column; }
+  a { color: var(--navy); }
+  code { font: 12px/1.4 Menlo, Consolas, monospace; background: var(--tint); padding: 1px 4px; border-radius: 4px; }
+  svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8;
+          stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .muted { color: var(--muted); } .err { color: var(--neg); }
+
+  /* ---------------------------------------------------------------- header */
+  .topbar { position: sticky; top: 0; z-index: 10; background: #fff; border-bottom: 1px solid var(--rule); }
+  .topbar::before { content: ""; display: block; height: 3px; background: var(--navy); }
+  .topbar-in { display: flex; align-items: center; gap: 18px; padding: 12px 28px; max-width: 1680px; margin: 0 auto; }
+  .brand img { display: block; height: 38px; width: auto; }
+  .brand-sep { width: 1px; height: 32px; background: var(--rule); }
+  .brand-app b { display: block; font-size: 16px; font-weight: 700; color: var(--navy); letter-spacing: -.005em; }
+  .brand-app span { display: block; font-size: 12px; color: var(--muted); }
+  .status { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end;
+            gap: 4px 14px; font-size: 12px; color: var(--muted); }
+  .status .s { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .status b { color: var(--ink); font-weight: 600; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: none; }
+  .dot.ok { background: #22A06B; box-shadow: 0 0 0 3px rgba(34,160,107,.15); }
+  .dot.warn { background: #E2A21B; box-shadow: 0 0 0 3px rgba(226,162,27,.18); }
+  .dot.bad { background: var(--neg); box-shadow: 0 0 0 3px rgba(179,38,30,.15); }
+  .progress { height: 2px; overflow: hidden; background: transparent; }
+  body.busy .progress { background: var(--tint); }
+  body.busy .progress::after { content: ""; display: block; height: 100%; width: 30%; background: var(--orange);
+                               animation: slide 1.3s ease-in-out infinite; }
+  @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+
+  /* ---------------------------------------------------------------- layout */
+  .layout { flex: 1; width: 100%; max-width: 1680px; margin: 0 auto; padding: 22px 28px 8px;
+            display: grid; grid-template-columns: 384px minmax(0, 1fr); gap: 24px; align-items: start; }
+  @media (min-width: 901px) {  /* the builder stays in view; the Generate bar is pinned to its bottom */
+    .panel { position: sticky; top: 84px; }
+    .panel .builder { max-height: calc(100vh - 100px); overflow-y: auto; padding-bottom: 0;
+               scrollbar-width: thin; scrollbar-color: #C5CCDA transparent; }
+    .gobar { position: sticky; bottom: 0; z-index: 2; margin: 0 -22px; padding: 0 22px 14px; background: #fff;
+             box-shadow: 0 -10px 12px -10px rgba(20,32,64,.10); }
+  }
+  .content { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+  .card { background: var(--card); border: 1px solid var(--rule); border-radius: 12px; box-shadow: var(--shadow); }
+
+  /* ---------------------------------------------------------------- builder (steps) */
+  .builder { padding: 2px 22px 20px; }
+  .step { padding: 14px 0 14px; border-bottom: 1px solid var(--rule-2); }
+  .step:last-child { border-bottom: 0; padding-bottom: 0; }
+  .step-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .num { width: 22px; height: 22px; border-radius: 50%; background: var(--orange); color: #fff; font-size: 12px;
+         font-weight: 700; display: grid; place-items: center; flex: none; }
+  .step h2 { margin: 0; font-size: 15px; font-weight: 700; color: var(--ink); letter-spacing: -.005em; }
+  .step-head .aside { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  .tickerbox { position: relative; }
+  .tickerbox svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--faint); }
+  .tickerbox input { width: 100%; height: 46px; padding: 0 14px 0 40px; border: 1px solid var(--rule); border-radius: 9px;
+                     font: 600 16px var(--font); color: var(--ink); background: #fff; letter-spacing: .01em;
+                     transition: border-color .15s, box-shadow .15s; }
+  .tickerbox input::placeholder { font-weight: 400; color: var(--faint); }
+  .tickerbox input:focus { outline: 0; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(27,58,140,.14); }
+  .samples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .samples .lbl { font-size: 12px; color: var(--muted); align-self: center; margin-right: 2px; }
+  .sample { display: inline-flex; align-items: baseline; gap: 5px; padding: 4px 10px; border: 1px solid var(--rule);
+            border-radius: 999px; background: #fff; color: var(--ink); font: 500 12px var(--font); cursor: pointer;
+            transition: background .15s, border-color .15s; }
+  .sample small { color: var(--faint); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .sample:hover { border-color: var(--navy); background: var(--tint-2); }
+  .sample.on { background: var(--tint); border-color: var(--navy); color: var(--navy); }
+  .sample.on small { color: var(--navy); opacity: .75; }
+  .hint { margin: 9px 0 0; font-size: 12px; color: var(--muted); }
+
+  .reports { display: grid; gap: 8px; }
+  .rcard { position: relative; display: grid; grid-template-columns: 34px 1fr 18px; gap: 12px; align-items: start;
+           padding: 10px 12px; border: 1px solid var(--rule); border-radius: 10px; background: #fff;
+           cursor: pointer; transition: border-color .15s, background .15s, box-shadow .15s; }
+  .rcard input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  .rcard:hover { border-color: #AFB9CF; }
+  .rcard .ric { width: 34px; height: 34px; border-radius: 8px; background: var(--tint); color: var(--navy);
+                display: grid; place-items: center; }
+  .rcard b { display: block; font-size: 14px; font-weight: 600; }
+  .rcard .rd { display: block; margin-top: 1px; font-size: 12.5px; line-height: 1.4; color: var(--muted); }
+  .rcard .tag { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 4px; background: var(--orange-tint);
+                color: var(--orange); font-size: 10.5px; font-weight: 700; letter-spacing: .03em; vertical-align: 1px; }
+  .rcard .tag.tag-plain { background: var(--tint); color: var(--navy); }
+  .rcard .tick { width: 18px; height: 18px; margin-top: 8px; border-radius: 50%; border: 1.5px solid #B9C1D3; }
+  .rcard:has(input:checked) { border-color: var(--navy); background: var(--tint-2); box-shadow: 0 0 0 1px var(--navy) inset; }
+  .rcard:has(input:checked) .ric { background: var(--navy); color: #fff; }
+  .rcard:has(input:checked) .tick { border: 5px solid var(--navy); }
+  .rcard:has(input:focus-visible) { outline: 2px solid var(--navy); outline-offset: 2px; }
+  .custom-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+
+  .opts { display: grid; gap: 2px; }
+  .opt { position: relative; display: grid; grid-template-columns: 34px 1fr; gap: 12px; padding: 6px 0; cursor: pointer; }
+  .opt input { position: absolute; left: 0; top: 6px; width: 34px; height: 20px; margin: 0; opacity: 0; cursor: pointer; z-index: 1; }
+  .sw { width: 34px; height: 20px; border-radius: 999px; background: #C5CCDA; position: relative; transition: background .15s; }
+  .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff;
+               box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform .15s; }
+  .opt input:checked + .sw { background: var(--navy); }
+  .opt input:checked + .sw::after { transform: translateX(14px); }
+  .opt input:focus-visible + .sw { outline: 2px solid var(--navy); outline-offset: 2px; }
+  .opt b { display: block; font-size: 13.5px; font-weight: 600; line-height: 20px; }
+  .opt small { display: block; font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .opt small.warnnote { color: var(--hold); }
+  .opt.off { cursor: default; } .opt.off input { cursor: default; } .opt.off .sw, .opt.off b { opacity: .45; }
+
+  details.more { margin-top: 8px; }
+  details.more summary { cursor: pointer; list-style: none; font-size: 12.5px; font-weight: 600; color: var(--navy);
+                         display: inline-flex; align-items: center; gap: 4px; padding: 4px 0; }
+  details.more summary::-webkit-details-marker, details.dev summary::-webkit-details-marker { display: none; }
+  details.more summary svg, details.dev summary svg.chev { width: 14px; height: 14px; transition: transform .15s; }
+  details[open] > summary svg.chev { transform: rotate(90deg); }
+  .more-body { margin-top: 6px; padding: 12px; border-radius: 9px; background: var(--tint-2); border: 1px solid var(--rule-2); }
+  .more-body > label:not(.opt) { display: block; margin: 0 0 4px; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .more-body .opt { margin: -4px 0 6px; }
+  .more-body label + select { margin-bottom: 10px; }
+  select { width: 100%; height: 36px; padding: 0 10px; border: 1px solid var(--rule); border-radius: 7px; background: #fff;
+           font: 13px var(--font); color: var(--ink); }
+  select:focus { outline: 2px solid rgba(27,58,140,.3); border-color: var(--navy); }
+  .more-body .hint { margin: 0; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 9px;
+         font: 600 14px var(--font); cursor: pointer; text-decoration: none; border: 1px solid transparent;
+         transition: background .15s, border-color .15s, color .15s, box-shadow .15s; white-space: nowrap; }
+  .btn:disabled { cursor: progress; opacity: .7; }
+  .btn-go { width: 100%; height: 48px; margin-top: 10px; background: var(--navy); color: #fff; font-size: 15px;
+            box-shadow: 0 1px 2px rgba(20,32,64,.2); }
+  .btn-go:hover:not(:disabled) { background: var(--navy-d); }
+  .btn-go:focus-visible { outline: 3px solid rgba(27,58,140,.35); outline-offset: 2px; }
+  .spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
+          animation: spin .8s linear infinite; display: none; }
+  .btn:disabled .spin { display: block; }
+  .btn:disabled .arrow { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .timer { margin: 8px 0 0; min-height: 18px; font-size: 12.5px; color: var(--muted); text-align: center;
+           font-variant-numeric: tabular-nums; }
+  .deephint { margin: 10px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--hold-tint); color: #6B5415; font-size: 12px; }
+
+  /* ---------------------------------------------------------------- empty / building */
+  .empty { padding: 40px 44px 36px; }
+  .empty-mark { width: 44px; height: 44px; display: block; margin-bottom: 14px; }
+  .eyebrow { margin: 0 0 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--orange); }
+  .empty h2, .building h2 { margin: 0; font-size: 26px; line-height: 1.2; font-weight: 800; color: var(--navy); letter-spacing: -.015em; }
+  .empty .lead { margin: 10px 0 0; max-width: 680px; font-size: 15px; line-height: 1.6; color: var(--muted); }
+  .feat { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 28px; }
+  .feat > div { padding: 16px; border-radius: 10px; background: var(--tint-2); border: 1px solid var(--rule-2); }
+  .feat .fi { width: 34px; height: 34px; border-radius: 8px; background: #fff; border: 1px solid var(--rule); color: var(--navy);
+              display: grid; place-items: center; margin-bottom: 10px; }
+  .feat b { display: block; font-size: 14px; }
+  .feat span { display: block; margin-top: 2px; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+  .how { margin: 28px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px;
+         counter-reset: how; }
+  .how li { position: relative; padding-top: 12px; border-top: 2px solid var(--rule-2); font-size: 12.5px; color: var(--muted);
+            line-height: 1.45; counter-increment: how; }
+  .how li::before { content: counter(how, decimal-leading-zero); display: block; font-size: 11px; font-weight: 700;
+                    letter-spacing: .08em; color: var(--navy); margin-bottom: 4px; }
+  .how b { color: var(--ink); font-weight: 600; }
+  .empty .small { margin: 24px 0 0; font-size: 12.5px; color: var(--muted); }
+
+  .building { padding: 40px 44px; display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; }
+  .ring { width: 48px; height: 48px; border-radius: 50%; border: 4px solid var(--tint); border-top-color: var(--navy);
+          animation: spin 1s linear infinite; }
+  .building p { margin: 8px 0 0; color: var(--muted); max-width: 640px; }
+  .building .how { grid-column: 1 / -1; margin-top: 8px; }
+  .building .bt { margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--navy); font-variant-numeric: tabular-nums; }
+
+  /* ---------------------------------------------------------------- result */
+  body.busy .result { opacity: .55; transition: opacity .2s; }
+  .co-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; padding: 2px 2px 0; }
+  .co-head h1 { margin: 0; font-size: 30px; line-height: 1.1; font-weight: 800; color: var(--navy); letter-spacing: -.02em; }
+  .co-sub { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
+  .co-sub b { color: var(--navy); font-weight: 700; }
+  .co-meta { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12px;
+          font-weight: 600; background: var(--tint); color: var(--navy); white-space: nowrap; }
+  .pill.ok { background: var(--pos-tint); color: var(--pos); } .pill.warn { background: var(--hold-tint); color: var(--hold); }
+  .pill.bad { background: var(--neg-tint); color: var(--neg); } .pill.plain { background: #fff; border: 1px solid var(--rule); color: var(--muted); font-weight: 500; }
+
+  .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
+  .tile { padding: 16px 18px 15px; }
+  .tile .tl { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .08em;
+              text-transform: uppercase; color: var(--muted); }
+  .tile .tl em { font-style: normal; margin-left: auto; padding: 0 6px; border-radius: 4px; background: var(--orange-tint);
+                 color: var(--orange); font-size: 10px; letter-spacing: .03em; text-transform: none; font-weight: 700; }
+  .tile .tv { margin-top: 8px; font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -.015em;
+              font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile .tv small { font-size: 14px; font-weight: 600; color: var(--muted); margin-right: 4px; letter-spacing: 0; }
+  .tile .ts { margin-top: 6px; font-size: 12px; line-height: 1.45; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .tile .ts .nw { white-space: nowrap; }
+  .tile .ts.split { display: flex; flex-wrap: wrap; gap: 0 10px; }
+  .tile .ts .b { color: var(--pos); font-weight: 600; } .tile .ts .s { color: var(--neg); font-weight: 600; }
+  .tv.pos { color: var(--pos); } .tv.neg { color: var(--neg); }
+  .badge { display: inline-block; padding: 4px 10px 3px; border-radius: 5px; color: #fff; font-size: 17px; font-weight: 800;
+           letter-spacing: .06em; text-transform: uppercase; line-height: 1.3; }
+  .tile.rating { box-shadow: inset 0 3px 0 var(--rc, var(--rule)), var(--shadow); }
+
+  /* source files: the feature card */
+  .pack { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); overflow: hidden; }
+  .pack-l { display: flex; flex-direction: column; padding: 24px 26px 20px; color: #fff; background: radial-gradient(120% 140% at 0% 0%, #2549A8 0%, var(--navy) 45%, var(--navy-d) 100%); }
+  .pack-l .eyebrow { color: #FFB38A; }
+  .pack-l h3 { margin: 0; font-size: 21px; line-height: 1.25; font-weight: 700; letter-spacing: -.01em; }
+  .pack-l p.d { margin: 8px 0 0; font-size: 13px; line-height: 1.55; color: rgba(255,255,255,.82); }
+  .pack-actions { display: grid; gap: 8px; margin-top: 18px; }
+  .btn-light { height: 42px; padding: 0 16px; background: #fff; color: var(--navy); }
+  .btn-light:hover:not(:disabled) { background: var(--tint); }
+  .btn-outline-light { height: 40px; padding: 0 16px; background: transparent; color: #fff; border-color: rgba(255,255,255,.45); font-weight: 500; font-size: 13px; }
+  .btn-outline-light:hover:not(:disabled) { background: rgba(255,255,255,.1); border-color: #fff; }
+  .btn-light .spin { border-color: rgba(27,58,140,.25); border-top-color: var(--navy); }
+  .btn-outline-light .spin { width: 14px; height: 14px; }
+  .pack-note { margin: auto 0 0; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.16); display: flex; gap: 8px;
+               align-items: flex-start; font-size: 12px; line-height: 1.45; color: rgba(255,255,255,.72); }
+  .pack-note svg.i { width: 15px; height: 15px; margin-top: 1px; }
+  .packmsg { margin: 10px 0 16px; min-height: 18px; font-size: 12.5px; color: rgba(255,255,255,.9); font-variant-numeric: tabular-nums; }
+  .packmsg .err { color: #FFC9C4; }
+  .pack-r { padding: 20px 24px; }
+  .pack-r h4 { margin: 0 0 8px; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .files { margin: 0; padding: 0; list-style: none; }
+  .files li { display: grid; grid-template-columns: 44px 1fr; gap: 12px; padding: 9px 0; border-top: 1px solid var(--rule-2); }
+  .files li:first-child { border-top: 0; }
+  .ft { height: 24px; border-radius: 5px; display: grid; place-items: center; font-size: 9.5px; font-weight: 800; letter-spacing: .04em; margin-top: 1px; }
+  .ft.xls { background: #E3F2E9; color: #1D6B43; } .ft.pdf { background: #FBE7E5; color: #A52A20; }
+  .ft.json { background: var(--tint); color: var(--navy); } .ft.doc { background: var(--orange-tint); color: #B9470A; }
+  .files b { display: block; font-size: 13.5px; font-weight: 600; }
+  .files b em { font-style: normal; font-weight: 500; font-size: 11.5px; color: var(--muted); margin-left: 4px; }
+  .files span.fd { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+
+  /* PDF */
+  .pdfcard { overflow: hidden; }
+  .pdf-bar { display: flex; align-items: center; gap: 12px; padding: 12px 14px 12px 18px; border-bottom: 1px solid var(--rule); }
+  .pdf-bar .pt { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .pdf-bar .pt .ic { width: 32px; height: 32px; border-radius: 8px; background: var(--neg-tint); color: var(--neg); display: grid; place-items: center; flex: none; }
+  .pdf-bar h3 { margin: 0; font-size: 14px; font-weight: 700; }
+  .pdf-bar .pn { display: block; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pdf-actions { margin-left: auto; display: flex; gap: 8px; }
+  .btn-ghost { height: 34px; padding: 0 12px; background: #fff; color: var(--ink); border-color: var(--rule); font-size: 13px; font-weight: 500; }
+  .btn-ghost:hover { border-color: #AFB9CF; background: var(--tint-2); }
+  .btn-navy { height: 34px; padding: 0 14px; background: var(--navy); color: #fff; font-size: 13px; }
+  .btn-navy:hover { background: var(--navy-d); }
+  .btn svg.i { width: 16px; height: 16px; }
+  iframe#pdf { display: block; width: 100%; height: clamp(680px, calc(100vh - 130px), 1150px); border: 0; background: #525659; }
+
+  /* details */
+  .details { padding: 20px 22px; }
+  .sec-h { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; }
+  .sec-h h3 { margin: 0; font-size: 15px; font-weight: 700; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; margin: 14px 0 0; }
+  .facts > div { display: grid; grid-template-columns: 150px 1fr; gap: 12px; padding: 8px 0; border-top: 1px solid var(--rule-2); font-size: 13px; }
+  .facts dt { color: var(--muted); } .facts dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .notes { margin-top: 16px; padding: 12px 14px; border-radius: 9px; background: var(--hold-tint); }
+  .notes h4 { margin: 0 0 4px; font-size: 12px; font-weight: 700; color: var(--hold); letter-spacing: .02em; }
+  .notes ul { margin: 0; padding-left: 18px; font-size: 12.5px; color: #5E4A12; }
+  .notes li + li { margin-top: 3px; }
+  p.unmatched { margin: 10px 0 0; font-size: 12.5px; }
+
+  /* developer */
+  details.dev { padding: 0; }
+  details.dev > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 14px 20px;
+                          font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  details.dev > summary .muted { font-weight: 400; font-size: 12.5px; }
+  details.dev > summary svg.code { width: 16px; height: 16px; color: var(--muted); }
+  details.dev > summary .chev { margin-left: auto; color: var(--muted); }
+  .dev-body { padding: 4px 20px 20px; border-top: 1px solid var(--rule-2); }
+  .dev-body h4 { margin: 14px 0 8px; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .dev-body p { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
+  .chip { font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--tint); color: var(--ink); }
+  .chip.ok { background: var(--pos-tint); color: var(--pos); } .chip.warn { background: var(--hold-tint); color: var(--hold); }
+  .chip.bad { background: var(--neg-tint); color: var(--neg); }
+  pre#json { margin: 0; max-height: 420px; overflow: auto; background: #0F172A; color: #E2E8F0; padding: 12px 14px;
+             border-radius: 8px; font: 12px/1.5 Menlo, Consolas, monospace; }
+
+  /* ---------------------------------------------------------------- footer */
+  footer { margin-top: 24px; border-top: 1px solid var(--rule); background: #fff; }
+  .foot-in { max-width: 1680px; margin: 0 auto; padding: 16px 28px; display: flex; align-items: center; gap: 14px;
+             font-size: 12px; color: var(--muted); }
+  .foot-in img { height: 22px; width: 22px; }
+  .foot-in .r { margin-left: auto; white-space: nowrap; }
+  .foot-in a { color: var(--muted); }
+
+  /* ---------------------------------------------------------------- responsive */
+  @media (max-width: 1360px) {
+    .layout { gap: 20px; padding: 20px 22px 8px; }
+    .topbar-in, .foot-in { padding-left: 22px; padding-right: 22px; }
+    .facts > div { grid-template-columns: 120px 1fr; }
+    .tile { padding: 14px 16px 13px; }
+    .tile .tv { font-size: 24px; }
+    .pack-l h3 { font-size: 19px; }
+    .pack-l, .pack-r { padding-left: 22px; padding-right: 22px; }
+  }
+  @media (max-width: 1180px) {
+    .layout { grid-template-columns: 340px minmax(0, 1fr); }
+    .pack { grid-template-columns: 1fr; }
+    .pack-actions { grid-template-columns: auto auto; justify-content: start; }
+    .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .facts { grid-template-columns: 1fr; }
+    .feat { grid-template-columns: 1fr; }
+    .how { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .status .s.opt-s { display: none; }
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .brand-app span, .brand-sep { display: none; }
+    .empty, .building { padding: 28px 24px; }
+    .pack-actions { grid-template-columns: 1fr; }
+  }
+  body.data-edition .ai-only { display: none; }
+
+  /* header link to the archive */
+  .navlink { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--rule);
+             color: var(--navy); font: 600 13px var(--font); text-decoration: none; white-space: nowrap; }
+  .navlink:hover { background: var(--tint-2); border-color: #AFB9CF; }
+  /* time and AI cost on each report card (measured on run 2) */
+  .rcard .rm { display: block; margin-top: 4px; font-size: 11.5px; line-height: 1.35; color: var(--faint);
+               font-variant-numeric: tabular-nums; }
+  .rcard .rm b { display: inline; font-size: inherit; color: var(--muted); font-weight: 600; }
+  .timing-note { margin: 8px 0 0; font-size: 11.5px; color: var(--faint); line-height: 1.4; }
+  /* all three reports: the in-page confirmation and the job's progress */
+  .confirm { margin: 10px 0 0; padding: 12px 13px; border-radius: 10px; background: var(--hold-tint); border: 1px solid #E8D9AE; }
+  .confirm b.ct { display: block; font-size: 13.5px; color: var(--ink); }
+  .confirm p { margin: 4px 0 10px; font-size: 12.5px; color: #5E4A12; line-height: 1.45; }
+  .confirm-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .confirm .btn { height: 36px; padding: 0 14px; font-size: 13px; }
+  .jobcard { padding: 20px 22px; }
+  .job-head { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .job-head h3 { margin: 0; font-size: 19px; font-weight: 700; color: var(--navy); }
+  .job-head .pill { margin-left: auto; }
+  .stages { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .stages li { padding: 10px 12px; border-radius: 9px; border: 1px solid var(--rule-2); background: var(--tint-2); font-size: 12.5px; color: var(--muted); }
+  .stages li b { display: block; font-size: 13px; color: var(--ink); }
+  .stages li.active { border-color: var(--navy); background: #fff; box-shadow: 0 0 0 1px var(--navy) inset; }
+  .stages li.active b::after { content: " · working"; color: var(--orange); font-weight: 600; }
+  .stages li.done { background: var(--pos-tint); border-color: #CBE5D6; } .stages li.done b::after { content: " ✓"; color: var(--pos); }
+  .stages li.failed { background: var(--neg-tint); border-color: #F0C9C5; } .stages li.failed b::after { content: " ✕"; color: var(--neg); }
+  .jobmeta { margin: 12px 0 0; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .jobnote { margin: 8px 0 0; font-size: 12.5px; color: #5E4A12; background: var(--hold-tint); padding: 8px 10px; border-radius: 8px; }
+  .jobnote.err { color: var(--neg); background: var(--neg-tint); }
+  .joblinks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .joblinks .btn { height: 36px; padding: 0 13px; font-size: 13px; }
+  @media (max-width: 700px) { .stages { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) {  /* phone: the header wraps (the status line goes under the logo) */
+    .topbar-in { flex-wrap: wrap; gap: 8px 12px; padding: 10px 16px; }
+    .brand img { height: 30px; }
+    .brand-app { display: none; }
+    .navlink { margin-left: auto; }
+    .status { margin-left: 0; width: 100%; justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></symbol>
+  <symbol id="i-report" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></symbol>
+  <symbol id="i-deep" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5z"/><path d="m3 13 9 5 9-5"/><path d="m3 17.5 9 5 9-5" opacity=".55"/></symbol>
+  <symbol id="i-learn" viewBox="0 0 24 24"><path d="M22 9 12 4 2 9l10 5 10-5z"/><path d="M6 11.2V16c0 1.6 2.7 3 6 3s6-1.4 6-3v-4.8"/><path d="M22 9v5"/></symbol>
+  <symbol id="i-layers3" viewBox="0 0 24 24"><rect x="3" y="3" width="11" height="13" rx="1.5"/><path d="M7 20h11.5a1.5 1.5 0 0 0 1.5-1.5V7"/><path d="M17 3.5v13"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M3.5 14.5h17M10 9.5v10"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H9l2 2.2h7.5A2.5 2.5 0 0 1 21 9.7v7.8a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><path d="M12 11v5m-2.5-2.5L12 16l2.5-2.5"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M6 16v-5M11 16V6M16 16v-8M20 16v-3"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="m7 10.5 5 5 5-5"/><path d="M5 20h14"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M19 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 4 18.5v-12A1.5 1.5 0 0 1 5.5 5H10"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+</svg>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="/" title="InvestSync Research Tools"><img src="/static/investsync-logo.png"
+       alt="InvestSync Student Investment Organization" width="190" height="38"></a>
+    <span class="brand-sep"></span>
+    <div class="brand-app"><b>Research Tools</b><span>Equity research reports, built from live data</span></div>
+    <a class="navlink" href="/archive" title="Every report generated so far"><svg class="i"><use href="#i-folder"/></svg>Archive</a>
+    <div id="status" class="status"><span class="s"><span class="dot"></span>Connecting…</span></div>
+  </div>
+  <div class="progress"></div>
+</header>
+
+<main class="layout">
+  <aside class="panel">
+    <form id="f" class="card builder" autocomplete="off">
+      <section class="step">
+        <div class="step-head"><span class="num">1</span><h2>Choose a company</h2></div>
+        <label for="t" class="sr">Ticker</label>
+        <div class="tickerbox"><svg class="i"><use href="#i-search"/></svg>
+          <input id="t" type="text" value="0700.HK" autocomplete="off" spellcheck="false"
+                 placeholder="Ticker, e.g. NVDA, 0700.HK, 600519.SH"></div>
+        <div class="samples" id="samples"></div>
+        <p class="hint"><b>.HK</b> Hong Kong · <b>.SH</b> / <b>.SZ</b> mainland China · US: no ending</p>
+      </section>
+
+      <section class="step">
+        <div class="step-head"><span class="num">2</span><h2>Choose a report</h2></div>
+        <div class="reports" role="radiogroup" aria-label="Report">
+          <label class="rcard"><input type="radio" name="report" value="standard" checked>
+            <span class="ric"><svg class="i"><use href="#i-report"/></svg></span>
+            <span><b>Standard report</b><span class="rd">One-page tear sheet plus 10 chapters: business, numbers, valuation, risks.</span>
+              <span class="rm"><b>About 15–25 min</b> on its own · about USD 0.20–0.30 of AI (estimate)</span></span>
+            <span class="tick"></span></label>
+          <label class="rcard"><input type="radio" name="report" value="deep">
+            <span class="ric"><svg class="i"><use href="#i-deep"/></svg></span>
+            <span><b>Deep report</b><span class="rd">An AI analyst, a bull / bear debate, a judge and a reviewer argue the case.</span>
+              <span class="rm"><b>About 20–25 min</b> · about USD 0.30 of AI</span></span>
+            <span class="tick"></span></label>
+          <label class="rcard"><input type="radio" name="report" value="learner">
+            <span class="ric"><svg class="i"><use href="#i-learn"/></svg></span>
+            <span><b>Learner's guide</b><span class="rd">The tear sheet with steps 1–8, plus a plain-English guide for beginners.</span>
+              <span class="rm"><b>About 15–25 min</b> on its own · about USD 0.20–0.30 of AI (estimate)</span></span>
+            <span class="tick"></span></label>
+          <label class="rcard"><input type="radio" name="report" value="data">
+            <span class="ric"><svg class="i"><use href="#i-table"/></svg></span>
+            <span><b>Data only<span class="tag tag-plain">NO AI</span></b><span class="rd">All the numbers, charts and sources, with no AI text and no rating. Room to write your own view.</span>
+              <span class="rm"><b>About 1–2 min</b> · free (no AI)</span></span>
+            <span class="tick"></span></label>
+          <label class="rcard"><input type="radio" name="report" value="all">
+            <span class="ric"><svg class="i"><use href="#i-layers3"/></svg></span>
+            <span><b>All three reports<span class="tag">BACKGROUND JOB</span></b><span class="rd">Deep first, then the standard report and the learner's guide from the same data: one price, one fair value, one rating.</span>
+              <span class="rm"><b>About 35–40 min</b> · about USD 0.50 of AI</span></span>
+            <span class="tick"></span></label>
+        </div>
+        <p class="timing-note">Times and AI cost measured on run 2 (NVDA, 12 Nov 2026). A standard report or learner's guide on
+          its own was not timed: it also reads the documents first, so its range is an estimate.</p>
+        <p class="custom-note" id="customnote" hidden></p>
+      </section>
+
+      <section class="step">
+        <div class="step-head"><span class="num">3</span><h2>Generate</h2></div>
+        <div class="opts">
+          <label class="opt" id="aiopt"><input type="checkbox" id="ai" checked><span class="sw"></span>
+            <span><b>AI commentary</b><small id="ainote">Written by DeepSeek, then checked against the data</small></span></label>
+          <label class="opt" id="filingsopt"><input type="checkbox" id="filings" checked><span class="sw"></span>
+            <span><b>Read the latest annual / interim report</b><small>What management says; slower for Hong Kong</small></span></label>
+        </div>
+        <details class="more"><summary><svg class="i chev"><use href="#i-chev"/></svg>More options</summary>
+          <div class="more-body">
+            <label class="opt"><input type="checkbox" id="refresh"><span class="sw"></span>
+              <span><b>Fetch fresh data</b><small>Ignore the result saved in the last 15 minutes</small></span></label>
+            <label for="layout">PDF layout</label>
+            <select id="layout"><option value="report">Full report (tear sheet + 10 chapters)</option>
+              <option value="tearsheet">Tear sheet only (1 page)</option>
+              <option value="learner">Learner's guide (page 1 + step-by-step guide for beginners)</option>
+              <option value="data">Data only (no AI text, no rating; room for your own view)</option></select>
+            <label for="mode">Commentary mode</label>
+            <select id="mode"><option value="">Default (from config)</option><option value="single">Single step</option>
+              <option value="deep">Deep (analyst, bull / bear debate, judge, reviewer · about 20–25 min)</option></select>
+            <p class="hint">The report cards in step 2 set these two for you.</p>
+          </div>
+        </details>
+        <div class="gobar">
+          <p class="deephint" id="deephint" hidden>The deep report needs AI commentary. With it off, you get the
+            standard report's data and charts.</p>
+          <button id="go" type="submit" class="btn btn-go"><span class="spin"></span><span id="golabel">Generate report</span>
+            <svg class="i arrow"><use href="#i-arrow"/></svg></button>
+          <div class="confirm" id="confirm" role="alertdialog" aria-labelledby="ctitle" aria-describedby="ctext" hidden>
+            <b class="ct" id="ctitle">Start all three reports for <span id="cticker"></span>?</b>
+            <p id="ctext">This writes the deep report, then the standard report and the learner's guide from the same data.
+              It uses about <b>USD 0.50 of AI credit</b> and takes about <b>35–40 minutes</b>. It runs in the background:
+              you can leave this page and come back. One such job runs at a time.</p>
+            <div class="confirm-actions">
+              <button type="button" class="btn btn-navy" id="cstart">Start (about USD 0.50)</button>
+              <button type="button" class="btn btn-ghost" id="ccancel">Cancel</button></div>
+          </div>
+          <p class="timer" id="timer"></p>
+        </div>
+      </section>
+    </form>
+  </aside>
+
+  <section class="content">
+    <div class="card jobcard" id="jobcard" hidden>
+      <div class="job-head"><div><p class="eyebrow">All three reports · background job</p><h3 id="jobtitle"></h3></div>
+        <span class="pill" id="jobstate"></span></div>
+      <ol class="stages" id="jobstages"></ol>
+      <p class="jobmeta" id="jobmeta"></p>
+      <p class="jobnote" id="jobnote" hidden></p>
+      <div class="joblinks" id="joblinks"></div>
+    </div>
+
+    <div class="card empty" id="empty">
+      <img class="empty-mark" src="/static/investsync-mark.png" alt="">
+      <p class="eyebrow">Equity research · tear sheet · full report</p>
+      <h2>Build a research report on any listed company</h2>
+      <p class="lead">Pick a company and a report on the left, then press <b>Generate report</b>. The tool fetches live
+        prices, statements, peers and filings, values the company, and draws the report in the InvestSync house style.</p>
+      <div class="feat">
+        <div><span class="fi"><svg class="i"><use href="#i-chart"/></svg></span><b>Key numbers</b>
+          <span>Price, AI rating, fair value and upside, at a glance.</span></div>
+        <div><span class="fi"><svg class="i"><use href="#i-report"/></svg></span><b>The PDF report</b>
+          <span>Read it here, open it in a new tab, or download it.</span></div>
+        <div><span class="fi"><svg class="i"><use href="#i-folder"/></svg></span><b>Source files</b>
+          <span>The Excel workbook and links an analyst works from.</span></div>
+      </div>
+      <ol class="how">
+        <li><b>Fetch</b> prices, statements, peers, broker views and the latest annual report.</li>
+        <li><b>Value</b> the company with a DCF or dividend model and peer multiples.</li>
+        <li><b>Rate</b> it by a fixed rule (Buy / Hold / Sell); the AI writes the reasoning.</li>
+        <li><b>Check</b> every figure in the text against the data, then draw the PDF.</li>
+      </ol>
+      <p class="small">A data-only report takes a minute or two. An AI report first reads the latest results,
+        announcements and news: about 15–25 minutes each, 35–40 minutes for all three (measured on run 2). Hong Kong
+        reports can take longer to download from mainland networks. Repeat builds within 15 minutes come from the cache.
+        Every report is saved in the <a href="/archive">archive</a>.</p>
+    </div>
+
+    <div class="card building" id="building" hidden>
+      <div class="ring"></div>
+      <div><h2>Building the <span id="bticker"></span> report…</h2>
+        <p>Fetching prices, statements, peers and filings, valuing the company and drawing the PDF. <span id="bexpect"></span>
+          Repeat builds within 15 minutes come from the cache.</p>
+        <div class="bt" id="btimer"></div></div>
+      <ol class="how">
+        <li><b>Fetch</b> prices, statements, peers, broker views and the latest annual report.</li>
+        <li><b>Value</b> the company with a DCF or dividend model and peer multiples.</li>
+        <li><b>Rate</b> it by a fixed rule (Buy / Hold / Sell); the AI writes the reasoning.</li>
+        <li><b>Check</b> every figure in the text against the data, then draw the PDF.</li>
+      </ol>
+    </div>
+
+    <div class="result" id="summary" hidden>
+      <div class="co-head" id="cohead"></div>
+      <div class="tiles" id="tiles"></div>
+    </div>
+
+    <div class="card pack result" id="packcard" hidden>
+      <div class="pack-l">
+        <p class="eyebrow">Source files</p>
+        <h3>The files an analyst works from</h3>
+        <p class="d" id="packdesc">Every number in the report and where it came from, for students who want to dig further. One pack
+          serves the company's standard, deep and learner reports: they share one data set.</p>
+        <div class="pack-actions">
+          <button type="button" id="packbtn" class="btn btn-light"><span class="spin"></span>
+            <svg class="i arrow"><use href="#i-down"/></svg>Download source files (.zip)</button>
+          <button type="button" id="packdocsbtn" class="btn btn-outline-light"><span class="spin"></span>
+            With the original documents (10+ min)</button>
+        </div>
+        <p class="packmsg" id="packmsg"></p>
+        <p class="pack-note"><svg class="i"><use href="#i-info"/></svg>Built from the result on this page, without
+          fetching the data again.</p>
+      </div>
+      <div class="pack-r">
+        <h4>What's in the pack</h4>
+        <ul class="files">
+          <li><span class="ft xls">XLSX</span><span><b>Excel workbook</b><span class="fd">Statements, ratios, valuation
+            workings, peers, prices, brokers<span class="ai-only">, and the research evidence behind every [R#] note with its exact
+            quote</span>.</span></span></li>
+          <li><span class="ft pdf">PDF</span><span><b>sources.pdf</b><span class="fd">How to use the pack, and every
+            source link.</span></span></li>
+          <li><span class="ft json">JSON</span><span><b>data.json</b><span class="fd">All of the data in one
+            machine-readable file.</span></span></li>
+          <li><span class="ft doc">DOCS</span><span><b>Original documents<em>optional</em></b><span class="fd">The company's
+            latest reports and the official documents the notes cite. Often takes 10 minutes or more (the SEC and HKEXnews
+            are slow from mainland networks). Broker research and news stay links.</span></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card pdfcard result" id="pdfcard" hidden>
+      <div class="pdf-bar">
+        <div class="pt"><span class="ic"><svg class="i"><use href="#i-report"/></svg></span>
+          <div style="min-width:0"><h3 id="pdftitle">Report</h3><span class="pn" id="pdfname"></span></div></div>
+        <div class="pdf-actions">
+          <button type="button" id="pdfpack" class="btn btn-ghost" hidden><svg class="i"><use href="#i-table"/></svg>Excel data pack</button>
+          <a id="pdfopen" class="btn btn-ghost" href="#" target="_blank" rel="noopener"><svg class="i"><use href="#i-ext"/></svg>Open in new tab</a>
+          <a id="pdfdl" class="btn btn-navy" href="#"><svg class="i"><use href="#i-down"/></svg>Download PDF</a>
+        </div>
+      </div>
+      <iframe id="pdf" title="Report PDF"></iframe>
+    </div>
+
+    <div class="card details result" id="detailscard" hidden>
+      <div class="sec-h"><h3>What went into this report</h3></div>
+      <div id="sum"></div>
+    </div>
+
+    <details class="card dev" id="dev">
+      <summary><svg class="i code"><use href="#i-code"/></svg>Developer
+        <span class="muted">server setup, API and the raw JSON</span><svg class="i chev"><use href="#i-chev"/></svg></summary>
+      <div class="dev-body">
+        <h4>Setup</h4>
+        <div id="devsetup" class="muted">Loading…</div>
+        <div id="jsoncard" hidden>
+          <h4>JSON payload (what the website receives)</h4>
+          <pre id="json"></pre>
+        </div>
+      </div>
+    </details>
+  </section>
+</main>
+
+<footer>
+  <div class="foot-in">
+    <img src="/static/investsync-mark.png" alt="">
+    <span>For education within the InvestSync Student Investment Organization (CUHK-Shenzhen) · the AI rating is a model
+      output, not investment advice</span>
+    <span class="r"><a href="/docs">API docs</a></span>
+  </div>
+</footer>
+
+<script>
+const SAMPLES = [["0700.HK", "Tencent"], ["9988.HK", "Alibaba"], ["0005.HK", "HSBC"], ["600519.SH", "Moutai"],
+                 ["300750.SZ", "CATL"], ["NVDA", "NVIDIA"], ["AAPL", "Apple"]];
+const REPORTS = {  // report card -> PDF layout and commentary mode (the "More options" selects)
+  standard: { layout: "report", mode: "", label: "Standard report" },
+  deep: { layout: "report", mode: "deep", label: "Deep report" },
+  learner: { layout: "learner", mode: "", label: "Learner's guide" },
+  data: { layout: "data", mode: "", label: "Data only (no AI)" },  // no AI call, no rating (API data_only=true)
+  all: { layout: "report", mode: "deep", label: "All three reports", job: true },  // POST /v1/runs (background job)
+};
+// how long the build in progress should take (run 2's measurements; the data-only build was timed at 90 s)
+const EXPECT = { data: "The data-only report takes a minute or two.",
+  deep: "An AI deep report takes about 20–25 minutes: it reads the latest results, announcements and news first.",
+  ai: "An AI report takes about 15–25 minutes: it reads the latest results, announcements and news first.",
+  noai: "Without AI commentary this takes a minute or two." };
+let jobMode = false;  // the "All three reports" card: a background job, not a layout of its own
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+const num = (x, d = 2) => x == null || isNaN(x) ? "–"
+  : Number(x).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (x) => x == null || isNaN(x) ? "–" : (x >= 0 ? "+" : "−") + Math.abs(x * 100).toFixed(1) + "%";
+const day = (s) => { const d = new Date(String(s).slice(0, 10) + "T00:00:00");
+  return isNaN(d) ? String(s ?? "") : d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); };
+
+// ---------------------------------------------------------------- step 1: company
+SAMPLES.forEach(([t, name]) => { const b = document.createElement("button"); b.type = "button"; b.className = "sample";
+  b.dataset.t = t; b.textContent = name; b.title = `${name}: ${t}`;
+  b.onclick = () => { $("t").value = t; markSample(); }; $("samples").appendChild(b); });
+$("samples").insertAdjacentHTML("afterbegin", `<span class="lbl">Try:</span>`);
+function markSample() {
+  const v = $("t").value.trim().toUpperCase();
+  document.querySelectorAll(".sample").forEach(b => b.classList.toggle("on", b.dataset.t === v));
+}
+try { const last = localStorage.getItem("lastTicker"); if (last) $("t").value = last; } catch (e) {}
+$("t").addEventListener("input", markSample); markSample();
+
+// ---------------------------------------------------------------- step 2: report (cards set the two selects)
+document.querySelectorAll('input[name="report"]').forEach(r => r.addEventListener("change", () => {
+  const c = REPORTS[r.value]; jobMode = !!c.job; $("layout").value = c.layout; $("mode").value = c.mode; syncReport();
+}));
+function currentReport() {
+  if (jobMode) return "all";
+  const l = $("layout").value, m = $("mode").value;
+  if (l === "learner") return "learner";
+  if (l === "data") return "data";
+  if (l === "report") return m === "deep" ? "deep" : "standard";
+  return null;  // tear sheet only
+}
+function reportLabel() {
+  const k = currentReport(), m = $("mode").value;
+  if (!k) return "One-page tear sheet";
+  return REPORTS[k].label + (k === "learner" && m === "deep" ? " (deep commentary)" : "");
+}
+// the AI and report switches as the user left them, while the data-only edition (off) or the all-three job (on)
+// fixes them
+let aiChoice = null, filingsChoice = null;
+function syncReport() {
+  const k = currentReport(), dataOnly = k === "data", all = k === "all";
+  const forced = dataOnly ? false : all ? true : null;
+  document.querySelectorAll('input[name="report"]').forEach(r => { r.checked = r.value === k; });
+  $("customnote").hidden = !!k;
+  if (!k) $("customnote").textContent = "Custom choice under More options: the one-page tear sheet only.";
+  if (forced !== null) { if (aiChoice === null) aiChoice = $("ai").checked; $("ai").checked = forced; }
+  else if (aiChoice !== null) { $("ai").checked = aiChoice; aiChoice = null; }
+  if (all) { if (filingsChoice === null) filingsChoice = $("filings").checked; $("filings").checked = true; }
+  else if (filingsChoice !== null) { $("filings").checked = filingsChoice; filingsChoice = null; }
+  $("ai").disabled = forced !== null; $("mode").disabled = forced !== null;
+  $("filings").disabled = all; $("layout").disabled = all;
+  document.body.classList.toggle("data-edition", dataOnly);  // hides text about AI-only content (e.g. [R#] notes)
+  $("aiopt").classList.toggle("off", forced !== null);
+  $("filingsopt").classList.toggle("off", all);
+  $("aiopt").title = dataOnly ? "The data-only edition makes no AI call" : all ? "The three reports are AI reports" : "";
+  $("deephint").hidden = forced !== null || !($("mode").value === "deep" && !$("ai").checked);
+  $("golabel").textContent = all ? "Start all three reports" : "Generate report";
+  if (!all) $("confirm").hidden = true;
+}
+["layout", "mode", "ai"].forEach(id => $(id).addEventListener("change", () => {
+  if (id !== "ai") jobMode = false;  // a manual layout or mode choice leaves the all-three card
+  syncReport();
+}));
+syncReport();
+
+// ---------------------------------------------------------------- server status
+async function loadStatus() {
+  try {
+    const s = await (await fetch("/v1/status")).json();
+    const chip = (ok, text) => `<span class="chip ${ok ? "ok" : "warn"}">${esc(text)}</span>`;
+    const ai = s.primary_model.configured || s.fallback_model.configured;
+    const aiText = s.primary_model.configured ? "on" : s.fallback_model.configured ? "on (backup model)" : "no key set";
+    $("status").innerHTML = `<span class="s"><span class="dot ok"></span><b>Server ready</b></span>
+      <span class="s"><span class="dot ${ai ? "ok" : "warn"}"></span>AI commentary: <b>${esc(aiText)}</b></span>
+      <span class="s opt-s"><span class="dot ${s.filings_enabled ? "ok" : "warn"}"></span>Annual reports: <b>${s.filings_enabled ? "on" : "off"}</b></span>`;
+    if (!ai) { $("ainote").textContent = "No AI key on this server: data only";
+               $("ainote").className = "warnnote"; }
+    $("devsetup").innerHTML = `<div class="chips">
+      ${chip(s.primary_model.configured, "Primary: " + s.primary_model.model + (s.primary_model.configured ? "" : " (no key)"))}
+      ${chip(s.fallback_model.configured, "Backup: " + (s.fallback_model.model || "not set") + (s.fallback_model.configured ? "" : " (no key)"))}
+      <span class="chip">Mode: ${esc(s.narrative_mode)}</span>
+      ${chip(s.filings_enabled, "Reports: " + (s.filings_enabled ? "on" : "off"))}
+      <span class="chip">Fact-check attempts: ${esc(s.guardrail_attempts)}</span></div>
+      <p>Keys go in <code>.env</code> (see <code>.env.example</code>); restart the server after editing.
+        The REST API and its documentation are at <a href="/docs">/docs</a>.</p>`;
+  } catch (e) {
+    $("status").innerHTML = `<span class="s"><span class="dot bad"></span><b class="err">Server not reachable</b></span>`;
+    $("devsetup").innerHTML = `<span class="err">Server not reachable.</span>`;
+  }
+}
+
+// ---------------------------------------------------------------- request
+function params() {
+  const p = new URLSearchParams({ ai: $("ai").checked, filings: $("filings").checked, refresh: $("refresh").checked });
+  if ($("layout").value === "data") { p.set("ai", "false"); p.set("data_only", "true"); return p; }  // no AI call
+  if ($("mode").value) p.set("mode", $("mode").value);
+  if ($("layout").value === "learner") p.set("learner", "true");  // same cached build as the PDF
+  return p;
+}
+
+// ---------------------------------------------------------------- result
+const RATING_COL = { Buy: "var(--pos)", Hold: "var(--hold)", Sell: "var(--neg)" };
+function tile(label, value, sub, o = {}) {  // o: { cls, color, tag, tone }
+  return `<div class="card tile ${o.cls || ""}"${o.color ? ` style="--rc:${o.color}"` : ""}>
+    <div class="tl">${label}${o.tag ? `<em>${o.tag}</em>` : ""}</div>
+    <div class="tv ${o.tone || ""}">${value}</div><div class="ts ${o.split ? "split" : ""}">${sub}</div></div>`;
+}
+const big = (x) => x == null || isNaN(x) ? "–" : x >= 1e12 ? (x / 1e12).toFixed(2) + "tn"
+  : x >= 1e9 ? (x / 1e9).toFixed(1) + "bn" : (x / 1e6).toFixed(1) + "mn";
+function summarise(d, report, dataOnly = false) {
+  const n = d.narrative || {}, v = d.valuation, g = n.guardrail, r = dataOnly ? null : d.rating, q = d.quote, pr = d.profile;
+  const val = v && (v.dcf || v.ddm);
+  const cur = (c) => `<small>${esc(c)}</small>`;
+
+  // company header
+  const commentary = dataOnly ? ["", "No AI text · no rating"]
+    : n.status === "generated" ? ["ok", g && g.passed ? "AI commentary · fact-checked" : "AI commentary"]
+    : n.status === "flagged" ? ["bad", "AI commentary flagged"] : ["warn", "Data only · no AI commentary"];
+  $("cohead").innerHTML = `<div><h1>${esc(pr.name)}</h1>
+      <p class="co-sub"><b>${esc(pr.ticker)}</b> · ${esc(pr.exchange)}${pr.sector ? " · " + esc(pr.sector) : ""}</p></div>
+    <div class="co-meta"><span class="pill">${esc(report)}</span><span class="pill ${commentary[0]}">${esc(commentary[1])}</span>
+      <span class="pill plain">Prices as of ${esc(day(q.as_of))}</span></div>`;
+
+  // stat tiles
+  const range = q.week52_low != null && q.week52_high != null
+    ? `52-week range <span class="nw">${num(q.week52_low)} – ${num(q.week52_high)}</span>` : `as of ${day(q.as_of)}`;
+  let rTile;
+  if (r) {
+    const col = RATING_COL[r.rating] || "var(--muted)";
+    const sub = r.fair_value != null ? (r.confidence ? `${esc(r.confidence[0].toUpperCase() + r.confidence.slice(1))} confidence` : "")
+                                     : esc(r.reason || "The valuation methods disagree");
+    rTile = tile("AI rating", `<span class="badge" style="background:${col}">${esc(r.rating)}</span>`,
+                 `<span title="${esc(r.reason || "")}">${sub}</span>`, { cls: "rating", color: col, tag: "model output" });
+  } else rTile = tile("AI rating", "–", "Not available for this company", { cls: "rating" });
+  let fv = "–", fvSub = "Not enough data to value", up = null, upSub = "from today's price to fair value";
+  if (r && r.fair_value != null) {
+    fv = `${cur(r.currency)}${num(r.fair_value)}`; up = r.upside;
+    fvSub = r.buy_below != null && r.sell_above != null
+      ? `<span class="b nw">Buy ≤ ${num(r.buy_below)}</span><span class="s nw">Sell ≥ ${num(r.sell_above)}</span>`
+      : "blend of the valuation methods";
+  } else if (val) {
+    fv = `${cur(v.currency)}${num(val.value_per_share)}`; up = val.upside; fvSub = `${v.dcf ? "DCF" : "Dividend model"} value per share`;
+    upSub = `to the ${v.dcf ? "DCF" : "dividend model"} value`;
+  }
+  const fwd = d.consensus && d.consensus.forward_pe != null ? `forward ${num(d.consensus.forward_pe, 1)}x` : "trailing twelve months";
+  $("tiles").innerHTML = dataOnly
+    ? tile("Share price", `${cur(q.currency)}${num(q.price)}`, range) +
+      tile("Market cap", `${cur(q.currency)}${big(q.market_cap)}`,
+           q.enterprise_value != null ? `enterprise value ${esc(q.currency)} ${big(q.enterprise_value)}` : "") +
+      tile("P/E", q.pe_ttm != null ? `${num(q.pe_ttm, 1)}x` : "–", fwd) +
+      tile(val ? (v.dcf ? "DCF value" : "Dividend model") : "Model value", val ? `${cur(v.currency)}${num(val.value_per_share)}` : "–",
+           val ? `${pct(val.upside)} vs the price · a calculation, not a target` : "Not enough data to value", { tag: "calculation" })
+    : tile("Share price", `${cur(q.currency)}${num(q.price)}`, range) + rTile + tile("Fair value", fv, fvSub, { split: true }) +
+      tile("Upside", up == null ? "–" : `${up >= 0 ? "▲" : "▼"} ${pct(up)}`, up == null ? "No fair value" : upSub,
+           { tone: up == null ? "" : up >= 0 ? "pos" : "neg" });
+
+  // details
+  const rows = [
+    ["Company", `${pr.name} (${pr.ticker})`],
+    ["Price", `${q.currency} ${num(q.price)}`],
+    ["Fiscal years", d.financials.years.map(y => y.fiscal_year).join(", ")],
+    ["Peers", d.comps ? d.comps.peers.map(p => p.ticker).join(", ") : "none"],
+    ["Valuation", val ? `${v.dcf ? "DCF" : "DDM"}: ${v.currency} ${num(val.value_per_share)} (${pct(val.upside)})` : "none"],
+    ["WACC", v && v.wacc && v.wacc.wacc != null ? (v.wacc.wacc * 100).toFixed(1) + "%" : "–"],
+    dataOnly ? ["Edition", "Data only: no AI call, no AI text, no rating"]
+    : ["AI rating", r ? (r.fair_value != null
+      ? `${r.rating} · fair value ${r.currency} ${num(r.fair_value)} (${pct(r.upside)}, ${r.confidence} confidence)`
+      : `${r.rating}: ${r.reason}`) : "–"],
+    ["Data audit", d.audit ? d.audit.status : "–"],
+    ["Reports read", d.filings.length ? d.filings.map(f => `${f.source}: ${f.title}`).join("; ") : "none"],
+    ["News items", d.news.length],
+  ];
+  const statusChip = n.status === "generated" ? "ok" : n.status === "flagged" ? "bad" : "warn";
+  const statusText = { generated: "written", flagged: "flagged by the fact check", placeholder: "none (data only)" }[n.status] || "none";
+  $("sum").innerHTML = `<div class="chips">
+      ${dataOnly ? `<span class="chip">Data-only edition: no AI calls</span>`
+        : `<span class="chip ${statusChip}" title="status: ${esc(n.status || "none")}">AI commentary: ${esc(statusText)}</span>`}
+      ${n.model ? `<span class="chip">Model: ${esc(n.model)}</span>` : ""}
+      ${n.mode ? `<span class="chip">Commentary mode: ${esc(n.mode)}</span>` : ""}
+      ${g ? `<span class="chip ${g.passed ? "ok" : "bad"}">Fact check: ${g.passed ? "passed" : "failed"} in ${g.attempts} attempt(s)</span>` : ""}
+    </div>
+    ${g && g.unmatched_numbers.length ? `<p class="err unmatched">Figures the fact check could not match: ${esc(g.unmatched_numbers.join(", "))}</p>` : ""}
+    <dl class="facts">${rows.map(([k, x]) => `<div><dt>${esc(k)}</dt><dd>${esc(x)}</dd></div>`).join("")}</dl>
+    ${d.warnings.length ? `<div class="notes"><h4>Data notes (${d.warnings.length})</h4><ul>${d.warnings.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}`;
+}
+
+function setBusy(on, t) {
+  document.body.classList.toggle("busy", on);
+  $("golabel").textContent = on ? "Building…" : "Generate report";
+  $("bexpect").textContent = currentReport() === "data" ? EXPECT.data : !$("ai").checked ? EXPECT.noai
+    : $("mode").value === "deep" ? EXPECT.deep : EXPECT.ai;
+  if (on && $("summary").hidden) { $("bticker").textContent = t.toUpperCase(); $("btimer").textContent = "";
+                                   $("building").hidden = false; $("empty").hidden = true; }
+  if (!on) { $("building").hidden = true; if ($("summary").hidden) $("empty").hidden = false; }
+}
+
+let pack = null;  // source-files download for the last result: { url, name }
+$("f").onsubmit = async (ev) => {
+  ev.preventDefault();
+  const t = $("t").value.trim(); if (!t) { $("t").focus(); return; }
+  if (jobMode) {  // a paid background job: ask first, on the page (not a browser dialog)
+    $("cticker").textContent = t.toUpperCase(); $("confirm").hidden = false; $("cstart").focus(); return;
+  }
+  try { localStorage.setItem("lastTicker", t); } catch (e) {}
+  $("go").disabled = true; const t0 = Date.now(); setBusy(true, t);
+  const report = reportLabel(), layout = $("layout").value, dataOnly = layout === "data";
+  const tick = setInterval(() => { const s = Math.round((Date.now() - t0) / 1000);
+    $("timer").textContent = `Working… ${s} s`; $("btimer").textContent = `${s} s`; }, 500);
+  try {
+    const p = params();
+    const r = await fetch(`/v1/tearsheets/${encodeURIComponent(t)}?${p}`);
+    const body = await r.json();
+    if (!r.ok) throw new Error(body.detail || r.statusText);
+    summarise(body, report, dataOnly);
+    $("json").textContent = JSON.stringify(body, null, 2);
+    p.set("refresh", "false");  // reuse the result just built
+    $("pdf").src = `/v1/tearsheets/${encodeURIComponent(t)}/pdf?${p}&layout=${layout}`;
+    $("pdfdl").href = $("pdf").src + "&download=true";
+    $("pdfopen").href = $("pdf").src;
+    $("pdftitle").textContent = `${report} · ${body.profile.name}`;
+    $("pdfname").textContent = `${body.profile.ticker.replace(".", "_")}_${layout}.pdf`;
+    ["summary", "pdfcard", "jsoncard", "packcard", "detailscard"].forEach(id => $(id).hidden = false); $("empty").hidden = true;
+    pack = { url: `/v1/tearsheets/${encodeURIComponent(t)}/datapack?${p}`,
+             name: `${body.profile.ticker.replace(".", "_")}_sources.zip` };
+    $("packmsg").textContent = "";
+    $("pdfpack").hidden = !dataOnly;  // the data-only edition: the numbers to work with, one click away
+    $("packdesc").textContent = dataOnly
+      ? "Every number in this data-only edition and where it came from, to build your own analysis: the Excel "
+        + "workbook has the statements, ratios, peers, prices and an editable DCF model."
+      : "Every number in the report and where it came from, for students who want to dig further. One pack "
+        + "serves the company's standard, deep and learner reports: they share one data set.";
+    $("timer").innerHTML = `Done in ${((Date.now() - t0) / 1000).toFixed(1)} s · the PDF is saved in the <a href="/archive">archive</a>`;
+  } catch (e) {
+    $("timer").innerHTML = `<span class="err">Failed: ${esc(e.message)}</span>`;
+  } finally { clearInterval(tick); $("go").disabled = false; setBusy(false); }
+};
+
+async function downloadPack(docs) {
+  if (!pack) return;
+  $("packbtn").disabled = $("packdocsbtn").disabled = $("pdfpack").disabled = true; const t0 = Date.now();
+  const tick = setInterval(() => { $("packmsg").textContent = `Preparing… ${Math.round((Date.now() - t0) / 1000)} s` +
+    (docs ? " · downloading the original documents can take 10+ minutes; keep reading meanwhile" : ""); }, 500);
+  try {
+    const r = await fetch(`${pack.url}&docs=${docs}`);
+    if (!r.ok) { let m = r.statusText; try { m = (await r.json()).detail || m; } catch (e) {} throw new Error(m); }
+    const blob = await r.blob(), a = document.createElement("a");
+    const name = docs ? pack.name.replace("_sources.zip", "_sources_with_documents.zip") : pack.name;
+    a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    $("packmsg").textContent = `Downloaded ${name} (${(blob.size / 1048576).toFixed(1)} MB) in ${((Date.now() - t0) / 1000).toFixed(1)} s`;
+  } catch (e) {
+    $("packmsg").innerHTML = `<span class="err">Failed: ${esc(e.message)}</span>`;
+  } finally { clearInterval(tick); $("packbtn").disabled = $("packdocsbtn").disabled = $("pdfpack").disabled = false; }
+}
+$("packbtn").onclick = () => downloadPack(false);
+$("pdfpack").onclick = () => { $("packcard").scrollIntoView({ behavior: "smooth", block: "nearest" }); downloadPack(false); };
+$("packdocsbtn").onclick = () => downloadPack(true);
+
+// ---------------------------------------------------------------- all three reports (background job, api/jobs.py)
+const STAGE_LABEL = { "deep": "Deep report", "standard + learner": "Standard report + learner's guide",
+                      "rendering": "Drawing the PDFs" };
+const STAGE_HINT = { "deep": "about 20–25 min", "standard + learner": "about 15 min", "rendering": "under a minute" };
+let jobTimer = null;
+const mins = (s) => s < 60 ? `${s} s` : `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, "0")} s`;
+function showJob(j) {
+  $("jobcard").hidden = false;
+  $("jobtitle").textContent = `${j.company || j.ticker} (${j.ticker})`;
+  const failed = j.stage === "failed", done = j.stage === "done";
+  $("jobstate").className = "pill " + (failed ? "bad" : done ? "ok" : "");
+  $("jobstate").textContent = failed ? "Stopped" : done ? "Finished" : j.stage === "queued" ? "Starting" : "Running";
+  const at = failed ? j.stages.indexOf(j.failed_stage) : done ? j.stages.length : j.stages.indexOf(j.stage);
+  $("jobstages").innerHTML = j.stages.map((st, i) => {
+    const cls = i < at ? "done" : i === at ? (failed ? "failed" : "active") : "";
+    return `<li class="${cls}"><b>${esc(STAGE_LABEL[st] || st)}</b>${esc(STAGE_HINT[st] || "")}</li>`;
+  }).join("");
+  $("jobmeta").textContent = `Elapsed ${mins(j.elapsed_s)} · AI cost so far USD ${num(j.cost_usd)}` +
+    (j.running ? " (added as each step finishes) · checking every 10 s" : "");
+  const msg = j.error || j.note;
+  $("jobnote").hidden = !msg; $("jobnote").textContent = msg || ""; $("jobnote").className = "jobnote" + (j.error ? " err" : "");
+  $("joblinks").innerHTML = j.reports.map(r =>
+      `<a class="btn btn-navy" href="${esc(r.pdf)}" target="_blank" rel="noopener"><svg class="i"><use href="#i-report"/></svg>${esc(r.label)}</a>
+       <a class="btn btn-ghost" href="${esc(r.json)}" target="_blank" rel="noopener">JSON</a>`).join("") +
+    (j.reports.length ? `<a class="btn btn-ghost" href="/archive?ticker=${encodeURIComponent(j.ticker)}">In the archive</a>` : "");
+}
+async function pollJob(id) {
+  clearTimeout(jobTimer);
+  try {
+    const r = await fetch(`/v1/runs/${encodeURIComponent(id)}`);
+    if (!r.ok) return;
+    const j = await r.json(); showJob(j);
+    if (j.running) jobTimer = setTimeout(() => pollJob(id), 10000);
+  } catch (e) { jobTimer = setTimeout(() => pollJob(id), 10000); }
+}
+$("ccancel").onclick = () => { $("confirm").hidden = true; };
+$("cstart").onclick = async () => {
+  const t = $("t").value.trim();
+  $("cstart").disabled = true;
+  try {
+    const r = await fetch("/v1/runs", { method: "POST", headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ ticker: t }) });
+    const body = await r.json();
+    if (!r.ok) throw new Error(body.detail || r.statusText);
+    $("confirm").hidden = true; $("timer").textContent = "";
+    showJob(body); $("jobcard").scrollIntoView({ behavior: "smooth", block: "start" }); pollJob(body.id);
+  } catch (e) {
+    $("timer").innerHTML = `<span class="err">Not started: ${esc(e.message)}</span>`;
+  } finally { $("cstart").disabled = false; }
+};
+async function resumeJob() {  // a job started earlier (this tab or another) keeps showing its progress
+  try {
+    const runs = (await (await fetch("/v1/runs")).json()).runs || [];
+    const j = runs[0];
+    if (j && (j.running || j.age_s < 3 * 3600)) { showJob(j); if (j.running) pollJob(j.id); }
+  } catch (e) {}
+}
+loadStatus();
+resumeJob();
+</script>
+</body>
+</html>

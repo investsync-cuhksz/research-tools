@@ -1,0 +1,9 @@
+# One ticker per line; lines starting with # are ignored.
+# Replace with the club's coverage list.
+0700.HK     # Tencent
+9988.HK     # Alibaba
+0005.HK     # HSBC
+600519.SH   # Kweichow Moutai
+300750.SZ   # CATL
+NVDA        # NVIDIA
+AAPL        # Apple

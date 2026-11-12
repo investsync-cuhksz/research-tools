@@ -1,0 +1,35 @@
+{
+  "_comment": "Valuation assumptions for the WACC / DCF / DDM section. Owned by the finance team: review and update at least twice a year. Rates are decimals (0.0514 = 5.14%). Keys are the company's reporting currency.",
+  "equity_risk_premium": {
+    "CNY": 0.0514,
+    "HKD": 0.0501,
+    "USD": 0.0446,
+    "_source": "Damodaran, Country Default Spreads and Risk Premiums (January 2026 update): China 5.14%, Hong Kong 5.01%, United States 4.46% total equity risk premium; mature-market ERP 4.23%. https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ctryprem.html"
+  },
+  "risk_free_by_currency": {
+    "CNY": "China 10Y",
+    "HKD": "US 10Y",
+    "USD": "US 10Y"
+  },
+  "terminal_growth": {
+    "CNY": 0.02,
+    "HKD": 0.02,
+    "USD": 0.025
+  },
+  "statutory_tax": {
+    "CNY": 0.25,
+    "HKD": 0.165,
+    "USD": 0.21
+  },
+  "explicit_years": 10,
+  "_explicit_years_note": "10 since run 2 (12 Nov 2026; was 5): after the consensus years the growth above terminal growth halves each year, so year 10 sits within about a point of terminal growth and the terminal value is a smaller share of EV. The reverse DCF holds the consensus years and solves for the later ones.",
+  "beta_years": 2,
+  "min_spread": 0.03,
+  "_min_spread_note": "DCF/DDM are not shown when the discount rate (WACC or cost of equity) is less than this far above terminal growth: the terminal value explodes. Low risk-free rates (China 10Y) plus low measured betas can trigger this; the finance team may prefer a normalised risk-free rate or a beta floor.",
+  "overrides": {
+    "_example_0005.HK": {
+      "equity_risk_premium": 0.0501,
+      "terminal_growth": 0.02
+    }
+  }
+}
