@@ -2,7 +2,7 @@
 
 > The design document of InvestSync Research Tools, written 6–12 November 2026 (it was the README until 13 Nov).
 > Some figures here (page counts, timings) describe earlier versions. The [README](../README.md) is the current
-> overview and setup guide; [HANDOFF.md](../HANDOFF.md) has every change since.
+> overview and setup guide.
 
 ## 📌 Executive Summary
 

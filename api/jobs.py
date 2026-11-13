@@ -1,6 +1,6 @@
 """All three reports in one go (12 Nov 2026, Karel: "make an option where they can run all 3 in one go").
 
-One background job per ticker, the way run 2's run.sh made it (archive/comparison-2026-11/runs/run2/run.sh):
+One background job per ticker, the way run 2's run script made it:
   1. deep: ``generate.py --ticker T --mode deep --layout report`` with RUN_BUDGET_USD 0.60 (past it, the judgement
      steps fall back to the primary model);
   2. standard + learner's guide from the deep run's saved data (``--data-from deep.json --mode single --layout

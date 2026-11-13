@@ -135,8 +135,7 @@ Scores out of 10, average of the two Claude Opus 5.5 reviewers (NVIDIA; learner'
 \*The benchmark ran on a subscription; the figure is a rough conversion at API prices, not a bill.
 
 Gemini, the third, non-Claude reviewer, scored run 4 at 8.1 / 8.2 / 8.4 against the benchmark's 9.2 / 9.4 / 9.5, a
-gap of about 1.1 points, and found no verified error in either team. All reviews, briefs and scores are in
-[`archive/comparison-2026-11/`](archive/comparison-2026-11/).
+gap of about 1.1 points, and found no verified error in either team.
 
 What this means in plain words: the reports are accurate (reviewers verify the reported figures and find few errors
 that change a conclusion), and cost well under a dollar for three reports. They still trail a top model working as a
@@ -154,7 +153,7 @@ Caveats:
   fixed in code.
 
 The full story (every round, every error found, what was changed after each) is in the
-[team briefing deck](#documentation) and [`HANDOFF.md`](HANDOFF.md).
+[team briefing deck](#documentation).
 
 ## Getting started
 
@@ -336,9 +335,7 @@ research-tools/
 ├── tests/  fixtures/       offline tests and saved data
 ├── output/archive/         every report made so far (PDF, JSON, data pack)
 ├── docs/                   methodology and images
-├── archive/                results of the 2026 model comparison and the presentation sources
-├── generate.py             command line
-└── HANDOFF.md              development log
+└── generate.py             command line
 ```
 
 ## Documentation
@@ -349,8 +346,6 @@ research-tools/
 | [Engineer's guide](https://claude.ai/artifact/85dqKn58Tf3qjjft3pMRSs) | A guided tour of the pipeline: one question per chapter, one real example each |
 | [Team briefing deck](https://claude.ai/artifact/G58C5XQDi2ZvYxhoidL8A1) | The project in 29 slides: the reports, how they are built, every review round, costs, next steps |
 | [Full presentation archive](https://claude.ai/artifact/Gp3fumsbHixhwGt8ySLtgM) | The long version (75+ slides) with every round's details |
-| [archive/](archive/) | Review results, run scripts and presentation sources from November 2026 |
-| [HANDOFF.md](HANDOFF.md) | The development log: every decision, run and result, newest first |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to set up, propose a change and the house rules for the code |
 
 ## Research partner kit
@@ -390,7 +385,7 @@ Sell when it is more than 10% below, Hold in between. The reports are for learni
 
 It is not allowed to, and code checks for it. Every figure in the AI text must match the data. Every claim must be
 supported by a quoted source, and a sentence that fails is rewritten or removed. Reviewers still find occasional
-errors, mostly in wording or dating rather than figures. Each run's errors are logged in `HANDOFF.md`.
+errors, mostly in wording or dating rather than figures.
 </details>
 
 <details>
@@ -445,7 +440,7 @@ every link. Details per market are in [docs/METHODOLOGY.md](docs/METHODOLOGY.md)
 
 Blind reviews: the reviewers got our reports and Claude Opus 5.5's reports under team letters, with a fixed brief.
 They had to check at least 12 key figures against primary sources, quote the exact words before logging an error,
-and score 7 criteria. The briefs and every review are in [archive/](archive/).
+and score 7 criteria.
 </details>
 
 ## Contributing

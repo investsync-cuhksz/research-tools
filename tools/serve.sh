@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Start the web app (http://localhost:8000) with run 2's model settings (12 Nov 2026), copied from
-# run 2's run.sh (now archive/comparison-2026-11/runs/run2/run.sh), so "All three reports" matches run 2's quality and cost (~USD 0.50).
+# run 2's run script, so "All three reports" matches run 2's quality and cost (~USD 0.50).
 # The OpenRouter key is read from secrets/openrouter.txt by investsync/config.py; it is never printed.
 # Usage: tools/serve.sh            (PORT=8001 tools/serve.sh for another port)
 set -e

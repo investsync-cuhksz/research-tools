@@ -3,6 +3,10 @@
 secrets/
 .claude/
 
+# Internal development log and records (kept locally, not published)
+HANDOFF.md
+/archive/
+
 # Python
 .venv/
 __pycache__/

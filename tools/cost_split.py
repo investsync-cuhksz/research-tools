@@ -5,7 +5,7 @@ extraction) you can divide that cost equally".
 
     python tools/cost_split.py DEEP.json SIMPLE.json [--out cost_split.json]
 
-How the set is made (archive/comparison-2026-11/runs/run3/run.sh and api/jobs.py): the deep run comes first; the
+How the set is made (api/jobs.py): the deep run comes first; the
 standard report and the learner's guide are then written in ONE second run on the deep run's saved data, reusing its
 research, forecast, scenarios, thesis memo and chosen analyst questions. So:
   * deep run, shared phases (SHARED3)   -> split equally over the three reports;

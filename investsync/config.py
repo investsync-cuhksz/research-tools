@@ -64,7 +64,7 @@ def _primary() -> LLMEndpoint:
 @dataclass(frozen=True)
 class Settings:
     llm: LLMEndpoint = field(default_factory=_primary)
-    # OpenRouter (final run, 10 Nov 2026; see HANDOFF §0.1): provider routing as JSON for the bulk model and for the
+    # OpenRouter (final run, 10 Nov 2026): provider routing as JSON for the bulk model and for the
     # judge tier, e.g. {"order":["deepinfra/fp8","deepseek"],"allow_fallbacks":false}. LLM_JUDGE_MODEL: a stronger
     # model for the five judgement checkpoints (scenarios, analyst brief, debate judge, deep reviewer, learner
     # coach via LLM_LEARNER_MODEL), each falling back to the primary model on failure; LLM_JUDGE_EFFORT its
@@ -142,7 +142,7 @@ class Settings:
     # LLM_WRITER_THINKING=enabled: the writer (every report section) and the learner coach think first, at
     # LLM_DEEP_EFFORT (otherwise only the deep analysis, debate, judge, reviewer and checks think).
     writer_thinking: bool = os.getenv("LLM_WRITER_THINKING", "disabled") == "enabled"
-    # Cost settings (9 Nov 2026 cost experiment, see HANDOFF): LLM_CHECK_EFFORT is the claim check's thinking
+    # Cost settings (9 Nov 2026 cost experiment): LLM_CHECK_EFFORT is the claim check's thinking
     # effort (default: LLM_DEEP_EFFORT); CLAIM_CHECK_LIMIT caps the sentences checked per pass;
     # CLAIM_CHECK_LEARNER / _DEBATE / _FINAL = 0 skip the check of the learner notes, of the deep debate
     # (arguments and judge), and the second pass over sentences the writer rewrote.
